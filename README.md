@@ -159,7 +159,7 @@ $ # You can also directly use the HTTP output provider into the APIMon configura
 
 or use [Logstash][logstash] to collect the JSON outputs:
 
-```json
+```
 input {
   pipe {
     type => "apimon"

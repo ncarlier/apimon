@@ -71,3 +71,16 @@ image:
 	docker build --rm -t ncarlier/$(APPNAME) .
 .PHONY: image
 
+## GZIP executable
+gzip:
+	tar cvzf $(ARTEFACT).tgz $(ARTEFACT)
+.PHONY: gzip
+
+## Create distribution binaries
+distribution:
+	GOARCH=amd64 make build gzip
+	GOARCH=arm64 make build gzip
+	GOARCH=arm make build gzip
+	GOOS=darwin make build gzip
+	GOOS=windows make build gzip
+.PHONY: distribution
