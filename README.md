@@ -1,5 +1,6 @@
 # apimon
 
+[![Build Status](https://travis-ci.org/ncarlier/apimon.svg?branch=master)](https://travis-ci.org/ncarlier/apimon)
 [![Image size](https://images.microbadger.com/badges/image/ncarlier/apimon.svg)](https://microbadger.com/images/ncarlier/apimon)
 [![Docker pulls](https://img.shields.io/docker/pulls/ncarlier/apimon.svg)](https://hub.docker.com/r/ncarlier/apimon/)
 
