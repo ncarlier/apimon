@@ -96,7 +96,6 @@ func (m Monitor) Start() {
 	ticker := time.NewTicker(m.Interval)
 	go func() {
 		for _ = range ticker.C {
-			logger.Debug.Printf("Running monitor %s#%d ...\n", m.Alias, m.ID)
 			var name string
 			if m.Alias != "" {
 				name = m.Alias
@@ -114,6 +113,7 @@ func (m Monitor) Start() {
 				_metric.Status = "DOWN"
 				_metric.Error = err.Error()
 			}
+			logger.Debug.Printf("monitor %s#%d: %s\n", m.Alias, m.ID, _metric)
 			metric.Queue <- *_metric
 		}
 	}()

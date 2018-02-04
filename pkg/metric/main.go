@@ -19,6 +19,22 @@ type Metric struct {
 	Error     string        `json:"error,omitempty"`
 }
 
+func (m Metric) String() string {
+	if m.Error != "" {
+		return fmt.Sprintf(
+			"{status: \"%s\", error: \"%s\", duration: %d, ts: %s}",
+			m.Status,
+			m.Error,
+			m.Duration,
+			m.Timestamp)
+	}
+	return fmt.Sprintf(
+		"{status: \"%s\", duration: %d, ts: %s}",
+		m.Status,
+		m.Duration,
+		m.Timestamp)
+}
+
 var producer *Producer
 
 // StartMetricProducer start metric producer
