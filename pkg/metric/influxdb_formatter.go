@@ -14,7 +14,7 @@ type InfluxDBMetricFormatter struct{}
 func (f *InfluxDBMetricFormatter) Format(metric Metric) string {
 	status := strconv.FormatBool(metric.Status == "UP")
 	duration := int64(metric.Duration / time.Millisecond)
-	ts := metric.Timestamp.Unix()
+	ts := metric.Timestamp.UnixNano()
 	if metric.Error != "" {
 		reason := strings.SplitN(metric.Error, ":", 2)[0]
 		reason = strings.ToLower(reason)
@@ -36,5 +36,5 @@ func (f *InfluxDBMetricFormatter) Format(metric Metric) string {
 
 // ContentType gets formatter content-type
 func (f *InfluxDBMetricFormatter) ContentType() string {
-	return "application/octet-stream"
+	return "text/plain"
 }
