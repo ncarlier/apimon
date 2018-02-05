@@ -110,7 +110,7 @@ considered as DOWN.
   - Validates a JSON path of the body response:
     `JSONPath:$.service[?(@.status == "UP")]`
 - `RegExp:`
-  - Validates the body response with a regular expression: `RegExp:/ok/`
+  - Validates the body response with a [regular expression][regexp-syntax]: `RegExp:^ok$`
 
 ## Usage
 
@@ -179,3 +179,4 @@ input {
 [influxdb]: https://github.com/influxdata/influxdb
 [influxdb-line-protocol]: https://docs.influxdata.com/influxdb/v1.4/write_protocols/line_protocol_tutorial/
 [influxdb-exporter]: https://github.com/prometheus/influxdb_exporter
+[regexp-syntax]: https://golang.org/pkg/regexp/syntax/

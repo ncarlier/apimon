@@ -31,6 +31,8 @@ func createValidator(def string) (Validator, error) {
 	switch name {
 	case "Code":
 		rule, err = newCodeValidator(param)
+	case "RegExp":
+		rule, err = newRegexpValidator(param)
 	default:
 		err = fmt.Errorf("unknown rule name: %s", name)
 	}
