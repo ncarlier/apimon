@@ -170,7 +170,7 @@ input {
 }
 ```
 
-> Note: Don't forge to use JSON format as output configuration!
+> Note: Don't forget to use JSON format as output configuration!
 
 ---
 
