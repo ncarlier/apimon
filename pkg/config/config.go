@@ -21,6 +21,7 @@ type Healthcheck struct {
 type Monitor struct {
 	Alias       string      `yaml:"alias"`
 	URL         string      `yaml:"url"`
+	Headers     []string    `yaml:"headers"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
 }
 

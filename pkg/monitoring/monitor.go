@@ -25,6 +25,7 @@ type Monitor struct {
 	ID         int
 	Alias      string
 	URL        url.URL
+	Headers    []string
 	Interval   time.Duration
 	Timeout    time.Duration
 	Validators []rule.Validator
@@ -71,6 +72,7 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 		Interval:   interval,
 		Timeout:    timeout,
 		Validators: validators,
+		Headers:    conf.Headers,
 		StopChan:   stop,
 		WaitGroup:  wg,
 	}
@@ -139,7 +141,13 @@ func (m Monitor) Validate() (time.Duration, error) {
 		return time.Since(start), fmt.Errorf("PREPARE_REQUEST: %s", err)
 	}
 	req = req.WithContext(ctx)
-	// req.Header.Add("If-None-Match", `some value`)
+
+	for _, header := range m.Headers {
+		parts := strings.SplitN(header, ":", 2)
+		if len(parts) == 2 {
+			req.Header.Add(parts[0], parts[1])
+		}
+	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		matched, _ := regexp.MatchString("context canceled", err.Error())
