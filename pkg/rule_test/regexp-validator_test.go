@@ -8,7 +8,7 @@ import (
 	"github.com/ncarlier/apimon/pkg/rule"
 )
 
-var notmatch = fmt.Errorf("Body does not match the RegExp")
+var notmatch = fmt.Errorf("body does not match the RegExp")
 
 var regExpValidationTests = []struct {
 	rule     string

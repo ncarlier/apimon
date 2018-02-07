@@ -1,6 +1,12 @@
-hash: a2546eade70e60a2dae6b9f58e794a4a94383ec5ba404a07d7d4e6268343a6ba
-updated: 2018-02-01T09:24:44.675881596Z
+hash: aea311bdf63b15bb02cfb3c06ac7f81f8e56ba682817c77cd3397c0dcd0ae711
+updated: 2018-02-07T19:31:23.693516053Z
 imports:
+- name: github.com/mohae/utilitybelt
+  version: d4f15c760e5a10346e7a4f25537ae32d3c839d83
+  subpackages:
+  - deepcopy
+- name: github.com/oliveagle/jsonpath
+  version: f95233d869819eb2cf1df702347887ae1775817d
 - name: gopkg.in/yaml.v2
   version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []

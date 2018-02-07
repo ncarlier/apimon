@@ -108,7 +108,7 @@ considered as DOWN.
   - Validates status code within an interval: `Code:200-299`
 - `JSONPath:`
   - Validates a JSON path of the body response:
-    `JSONPath:$.service[?(@.status == "UP")]`
+    `JSONPath:$.service[?(@.status == 'UP')]`
 - `RegExp:`
   - Validates the body response with a [regular expression][regexp-syntax]: `RegExp:^ok$`
 

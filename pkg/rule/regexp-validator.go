@@ -37,5 +37,5 @@ func (v *regexpValidator) Validate(status int, headers http.Header, body string)
 	if v.re.MatchString(body) {
 		return nil
 	}
-	return fmt.Errorf("Body does not match the RegExp")
+	return fmt.Errorf("body does not match the RegExp")
 }

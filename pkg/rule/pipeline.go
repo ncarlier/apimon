@@ -33,6 +33,8 @@ func createValidator(def string) (Validator, error) {
 		rule, err = newCodeValidator(param)
 	case "RegExp":
 		rule, err = newRegexpValidator(param)
+	case "JSONPath":
+		rule = newJSONPathValidator(param)
 	default:
 		err = fmt.Errorf("unknown rule name: %s", name)
 	}

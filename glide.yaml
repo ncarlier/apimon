@@ -1,3 +1,4 @@
 package: github.com/ncarlier/apimon
 import:
 - package: gopkg.in/yaml.v2
+- package: github.com/oliveagle/jsonpath
