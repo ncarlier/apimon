@@ -71,6 +71,11 @@ image:
 	docker build --rm -t ncarlier/$(APPNAME) .
 .PHONY: image
 
+## Generate changelog
+changelog:
+	standard-changelog --first-release
+.PHONY: changelog
+
 ## GZIP executable
 gzip:
 	tar cvzf $(ARTEFACT).tgz $(ARTEFACT)
