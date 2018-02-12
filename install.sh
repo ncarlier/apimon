@@ -42,4 +42,4 @@ echo "Making $bin_target as executable ..."
 sudo chmod +x $bin_target
 [ $? != 0 ] && die "Unable to make the binary as executable."
 
-echo "Installation done. Type 'webhookd' to start the server."
+echo "Installation done. Type 'apimon' to start the app."
