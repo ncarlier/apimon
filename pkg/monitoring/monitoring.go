@@ -19,6 +19,10 @@ func StartMonitoring(conf config.Config) error {
 		mConfig := conf.Monitors[i]
 		// Apply global configuration
 		mConfig.Healthcheck = config.MergeHealthcheckConfig(conf.Healthcheck, mConfig.Healthcheck)
+		// Apply proxy configuration
+		if mConfig.Proxy == "" {
+			mConfig.Proxy = conf.Proxy
+		}
 		// Create new monitor
 		worker, err := NewMonitor(i+1, mConfig, stop, &wg)
 		if err != nil {

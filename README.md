@@ -40,6 +40,7 @@ output:            # Output configuration
   meta:
     influxdb_metric_name: http_health_check
 user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0"
+proxy: http://proxy-internet.localnet:3128 # Global HTTP proxy to use. By default none
 healthcheck:            # Global healthcheck configuration
   interval: 5s          # By default 30s
   timeout: 2s           # By default 5s
@@ -47,8 +48,9 @@ healthcheck:            # Global healthcheck configuration
 monitors: # Monitors configuration
   - alias: nunux-keeper-api
     url: https://api.nunux.org/keeper/ # The URL to monitor
-    unsafe: true
-    headers:
+    unsafe: true # Don't check SSL certificate. By default false
+    proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use (overide global). By default none
+    headers: # HTTP headers to add to the request
       - "X-API-Key: xxx-xxx-xxx"
     healthcheck: # Monitor specific configuration (overide global)
       timeout: 100ms
