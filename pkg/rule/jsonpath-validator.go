@@ -9,16 +9,14 @@ import (
 )
 
 type jsonpathValidator struct {
-	name  string
-	def   string
-	jpath string
+	name string
+	spec string
 }
 
-func newJSONPathValidator(param string) Validator {
+func newJSONPathValidator(spec string) Validator {
 	validator := &jsonpathValidator{
-		name:  "JSONPath",
-		def:   "JSONPath:" + param,
-		jpath: param,
+		name: "json-path",
+		spec: spec,
 	}
 	return validator
 }
@@ -27,8 +25,8 @@ func (v *jsonpathValidator) Name() string {
 	return v.name
 }
 
-func (v *jsonpathValidator) Def() string {
-	return v.def
+func (v *jsonpathValidator) Spec() string {
+	return v.spec
 }
 
 func (v *jsonpathValidator) Validate(status int, headers http.Header, body string) error {
@@ -37,7 +35,7 @@ func (v *jsonpathValidator) Validate(status int, headers http.Header, body strin
 	if err != nil {
 		return fmt.Errorf("body is not valid JSON")
 	}
-	res, err := jsonpath.JsonPathLookup(jsonData, v.jpath)
+	res, err := jsonpath.JsonPathLookup(jsonData, v.spec)
 	if err != nil {
 		return err
 	}

@@ -10,11 +10,17 @@ type Output struct {
 	Format string `yaml:"format"`
 }
 
+// Rule configuration of a validation rule
+type Rule struct {
+	Name string `yaml:"name"`
+	Spec string `yaml:"spec"`
+}
+
 // Healthcheck configuration of a healthcheck
 type Healthcheck struct {
 	Interval string `yaml:"interval"`
 	Timeout  string `yaml:"timeout"`
-	Rules    string `yaml:"rules"`
+	Rules    []Rule `yaml:"rules"`
 }
 
 // Monitor configuration of a monitor
@@ -55,7 +61,7 @@ func MergeHealthcheckConfig(a, b Healthcheck) Healthcheck {
 	if result.Timeout == "" {
 		result.Timeout = a.Timeout
 	}
-	if result.Rules == "" {
+	if len(result.Rules) == 0 {
 		result.Rules = a.Rules
 	}
 	return result

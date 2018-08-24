@@ -7,7 +7,9 @@ user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.
 healthcheck:
   interval: 5s
   timeout: 2s
-  rules: "Code:200-299"
+  rules:
+    - name: code
+      spec: 200-299
 monitors:
   - alias: nunux-keeper-api
     url: https://api.nunux.org/keeper/
@@ -16,5 +18,7 @@ monitors:
       - "X-API-Key: xxx-xxx-xxx"
     healthcheck:
       timeout: 100ms
-      rules: "Code:200"
+      rules:
+        - name: code
+          spec: 200
   - url: https://reader.nunux.org

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/ncarlier/apimon/pkg/assert"
+	"github.com/ncarlier/apimon/pkg/config"
 	"github.com/ncarlier/apimon/pkg/rule"
 )
 
@@ -18,26 +19,27 @@ var json = `
 `
 
 var jsonPathValidationTests = []struct {
-	rule     string
+	spec     string
 	body     string
 	expected error
 }{
-	{"JSONPath:$.services[0].status", json, nil},
-	{"JSONPath:$.services[0].missing", json, fmt.Errorf("key error: missing not found in object")},
-	{"JSONPath:$.services[?(@.status == 'UP')]", json, nil},
-	{"JSONPath:$.services[?(@.status == 'UP')].name", json, nil},
-	{"JSONPath:$.services[?(@.status == 'ERROR')].name", json, fmt.Errorf("body does not match JSON path")},
-	{"JSONPath:...", json, fmt.Errorf("should start with '$'")},
+	{"$.services[0].status", json, nil},
+	{"$.services[0].missing", json, fmt.Errorf("key error: missing not found in object")},
+	{"$.services[?(@.status == 'UP')]", json, nil},
+	{"$.services[?(@.status == 'UP')].name", json, nil},
+	{"$.services[?(@.status == 'ERROR')].name", json, fmt.Errorf("body does not match JSON path")},
+	{"...", json, fmt.Errorf("should start with '$'")},
 }
 
 func TestJSONPathValidator(t *testing.T) {
 	for idx, tt := range jsonPathValidationTests {
-		pipeline, err := rule.CreateValidatorPipeline(tt.rule)
+		rules := []config.Rule{config.Rule{Name: "json-path", Spec: tt.spec}}
+		pipeline, err := rule.CreateValidatorPipeline(rules)
 		assert.Nil(t, err, "Pipeline creation should not fail")
 		assert.NotNil(t, pipeline, "Pipeline should be created")
 		assert.Equal(t, 1, len(pipeline), "Invalid validator pipeline")
 		validator := pipeline[0]
-		assert.Equal(t, "JSONPath", validator.Name(), "Invalid validator name")
+		assert.Equal(t, "json-path", validator.Name(), "Invalid validator name")
 		actual := validator.Validate(200, nil, tt.body)
 		if (tt.expected == nil && actual != nil) ||
 			(actual == nil && tt.expected != nil) ||
