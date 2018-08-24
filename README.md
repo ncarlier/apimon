@@ -7,6 +7,8 @@
 APImon is a simple tool for monitoring HTTP endpoints and sending metrics to a
 robust monitoring platform (such as TICK, ELK, etc.).
 
+![Logo](apimon.svg)
+
 ## Installation
 
 Run the following command:
