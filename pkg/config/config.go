@@ -23,12 +23,15 @@ type Monitor struct {
 	URL         string      `yaml:"url"`
 	Headers     []string    `yaml:"headers"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
+	Proxy       string      `yaml:"proxy"`
+	Unsafe      bool        `yaml:"unsafe"`
 }
 
 // Config configuration structure
 type Config struct {
 	Output      Output      `yaml:"output"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
+	Proxy       string      `yaml:"proxy"`
 	Monitors    []Monitor   `yaml:"monitors"`
 }
 

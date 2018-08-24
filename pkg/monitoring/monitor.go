@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -26,6 +27,7 @@ type Monitor struct {
 	Alias      string
 	URL        url.URL
 	Headers    []string
+	Client     *http.Client
 	Interval   time.Duration
 	Timeout    time.Duration
 	Validators []rule.Validator
@@ -41,6 +43,7 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 		logger.Warning.Printf("Unable to parse healthcheck interval: '%s'. Using default: %s", conf.Healthcheck.Interval, defaultDuration)
 		interval = defaultDuration
 	}
+
 	// Parse the timeout...
 	timeout, err := time.ParseDuration(conf.Healthcheck.Timeout)
 	if err != nil {
@@ -51,12 +54,30 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 		logger.Warning.Printf("Timeout can't be longer than the interval: %s > %s. Adjusting timeout.", timeout, interval)
 		timeout = interval - time.Duration(100)*time.Millisecond
 	}
+
 	// Parse the URL
 	u, err := url.ParseRequestURI(conf.URL)
 	if err != nil {
 		logger.Error.Printf("Unable to parse URL: '%s'", conf.URL)
 		return nil, err
 	}
+
+	// Create HTTP client
+	client := &http.Client{}
+	transport := &http.Transport{}
+	if conf.Proxy != "" {
+		proxyURL, err := url.ParseRequestURI(conf.Proxy)
+		if err != nil {
+			logger.Error.Printf("Unable to parse Proxy URL: '%s'", conf.Proxy)
+			return nil, err
+		}
+		transport.Proxy = http.ProxyURL(proxyURL)
+	}
+	if conf.Unsafe {
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+	client.Transport = transport
+
 	// Parse validators
 	validators, err := rule.CreateValidatorPipeline(conf.Healthcheck.Rules)
 	if err != nil {
@@ -69,6 +90,7 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 		ID:         id,
 		Alias:      conf.Alias,
 		URL:        *u,
+		Client:     client,
 		Interval:   interval,
 		Timeout:    timeout,
 		Validators: validators,
@@ -97,7 +119,7 @@ func (m Monitor) Start() {
 	logger.Debug.Printf("Starting monitor %s#%d...\n", m.Alias, m.ID)
 	ticker := time.NewTicker(m.Interval)
 	go func() {
-		for _ = range ticker.C {
+		for range ticker.C {
 			var name string
 			if m.Alias != "" {
 				name = m.Alias
@@ -148,7 +170,7 @@ func (m Monitor) Validate() (time.Duration, error) {
 			req.Header.Add(parts[0], parts[1])
 		}
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := m.Client.Do(req)
 	if err != nil {
 		matched, _ := regexp.MatchString("context canceled", err.Error())
 		if matched {
