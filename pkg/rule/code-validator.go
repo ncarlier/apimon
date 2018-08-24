@@ -9,23 +9,23 @@ import (
 
 type codeValidator struct {
 	name     string
-	def      string
+	spec     string
 	fromCode int
 	toCode   int
 	codes    []int
 }
 
-func newCodeValidator(param string) (Validator, error) {
+func newCodeValidator(spec string) (Validator, error) {
 	validator := &codeValidator{
-		name: "Code",
-		def:  "Code:" + param,
+		name: "code",
+		spec: spec,
 	}
-	if strings.ContainsAny(param, "-") {
-		codes := strings.SplitN(param, "-", 2)
+	if strings.ContainsAny(spec, "-") {
+		codes := strings.SplitN(spec, "-", 2)
 		validator.fromCode, _ = strconv.Atoi(codes[0])
 		validator.toCode, _ = strconv.Atoi(codes[1])
 	} else {
-		codes := strings.Split(param, ",")
+		codes := strings.Split(spec, ",")
 		for _, c := range codes {
 			code, err := strconv.Atoi(c)
 			if err != nil {
@@ -42,8 +42,8 @@ func (v *codeValidator) Name() string {
 	return v.name
 }
 
-func (v *codeValidator) Def() string {
-	return v.def
+func (v *codeValidator) Spec() string {
+	return v.spec
 }
 
 func (v *codeValidator) Validate(status int, headers http.Header, body string) error {

@@ -17,22 +17,13 @@ func TestMonitorWithBadURLConfiguration(t *testing.T) {
 	conf := &config.Monitor{
 		URL: "foo",
 		Healthcheck: config.Healthcheck{
-			Rules: "Code:200",
+			Rules: []config.Rule{
+				config.Rule{Name: "code", Spec: "200"},
+			},
 		},
 	}
 
 	expected := "parse foo: invalid URI for request"
-	_, err := monitoring.NewMonitor(0, *conf, stop, &wg)
-	assert.NotNil(t, err, "Monitor creation should fail")
-	assert.Equal(t, expected, err.Error(), "Unexpected error")
-}
-
-func TestMonitorWithBadRuleConfiguration(t *testing.T) {
-	conf := &config.Monitor{
-		URL: "http://foo",
-	}
-
-	expected := "rule is empty"
 	_, err := monitoring.NewMonitor(0, *conf, stop, &wg)
 	assert.NotNil(t, err, "Monitor creation should fail")
 	assert.Equal(t, expected, err.Error(), "Unexpected error")
@@ -43,9 +34,6 @@ func TestMonitorWithDefaultConfiguration(t *testing.T) {
 	expectedTimeout := time.Duration(5) * time.Second
 	conf := &config.Monitor{
 		URL: "http://foo",
-		Healthcheck: config.Healthcheck{
-			Rules: "Code:200",
-		},
 	}
 
 	monitor, err := monitoring.NewMonitor(0, *conf, stop, &wg)
@@ -53,6 +41,9 @@ func TestMonitorWithDefaultConfiguration(t *testing.T) {
 	assert.NotNil(t, monitor, "Monitor should be created")
 	assert.Equal(t, expectedTimeout, monitor.Timeout, "Unexpected monitor timeout")
 	assert.Equal(t, expectedInterval, monitor.Interval, "Unexpected monitor timeout")
+	assert.Equal(t, 1, len(monitor.Validators), "Unexpected number of validators")
+	assert.Equal(t, "code", monitor.Validators[0].Name, "Unexpected validator name")
+	assert.Equal(t, "200", monitor.Validators[0].Spec, "Unexpected validator spec")
 }
 
 func TestMonitorWithAdjustedConfiguration(t *testing.T) {
@@ -63,7 +54,9 @@ func TestMonitorWithAdjustedConfiguration(t *testing.T) {
 		Healthcheck: config.Healthcheck{
 			Interval: "2s",
 			Timeout:  "2s",
-			Rules:    "Code:200",
+			Rules: []config.Rule{
+				config.Rule{Name: "code", Spec: "200"},
+			},
 		},
 	}
 

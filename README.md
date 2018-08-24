@@ -46,7 +46,9 @@ proxy: http://proxy-internet.localnet:3128 # Global HTTP proxy to use. By defaul
 healthcheck:            # Global healthcheck configuration
   interval: 5s          # By default 30s
   timeout: 2s           # By default 5s
-  rules: "Code:200-299" # By default "Code:200"
+  rules:                # By default "code: 200"
+    - name: code
+      spec: 200-299
 monitors: # Monitors configuration
   - alias: nunux-keeper-api
     url: https://api.nunux.org/keeper/ # The URL to monitor
@@ -56,7 +58,9 @@ monitors: # Monitors configuration
       - "X-API-Key: xxx-xxx-xxx"
     healthcheck: # Monitor specific configuration (overide global)
       timeout: 100ms
-      rules: "Code:200"
+      rules:
+        - name: code
+          spec: 200
   - url: https://reader.nunux.org
 ```
 
@@ -96,25 +100,25 @@ A health check is defined like this:
 - `timeout`: the maximum time allowed for a check
 - `rules`: all validation rules (separated by semicolon)
 
-A rule have the following pattern: `Name:conf`
-The rule's name selects the validator to be applied.
-And what is behind the colon is the configuration of the validator.
+A rule have the following structure:
 
-Validators can be chained (separated by semicolon).
+- `name`: rule name
+- `spec`: rule specification
+
+The rule's name selects the validator to be applied.
+And rule 's spec is the configuration of the validator.
+
+Validators can be chained (it is a list).
 The first failed validator stops the validation chain and the monitor is
 considered as DOWN.
 
 ### Available validators
 
-- `Code:`
-  - Validates status code: `Code:200`
-  - Validates status code in a list: `Code:200,204,205`
-  - Validates status code within an interval: `Code:200-299`
-- `JSONPath:`
-  - Validates a JSON path of the body response:
-    `JSONPath:$.service[?(@.status == 'UP')]`
-- `RegExp:`
-  - Validates the body response with a [regular expression][regexp-syntax]: `RegExp:^ok$`
+Name   | Spec 
+-------|------
+`code` | Validates status code (ex: `200`)<br>Validates status code in a list (ex: `200,204,205`)<br>Validates status code within an interval (ex: `200-204`)
+`json-path` | Validates a JSON path of the body response (ex: `$.service[?(@.status == 'UP')]`)
+`regexp:` | Validates the body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
 
 ## Usage
 

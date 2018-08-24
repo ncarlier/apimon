@@ -8,17 +8,17 @@ import (
 
 type regexpValidator struct {
 	name string
-	def  string
+	spec string
 	re   *regexp.Regexp
 }
 
-func newRegexpValidator(param string) (Validator, error) {
+func newRegexpValidator(spec string) (Validator, error) {
 	validator := &regexpValidator{
-		name: "RegExp",
-		def:  "RegExp:" + param,
+		name: "regexp",
+		spec: spec,
 	}
 	var err error
-	validator.re, err = regexp.Compile(param)
+	validator.re, err = regexp.Compile(spec)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +29,8 @@ func (v *regexpValidator) Name() string {
 	return v.name
 }
 
-func (v *regexpValidator) Def() string {
-	return v.def
+func (v *regexpValidator) Spec() string {
+	return v.spec
 }
 
 func (v *regexpValidator) Validate(status int, headers http.Header, body string) error {

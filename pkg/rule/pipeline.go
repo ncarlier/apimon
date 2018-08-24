@@ -2,15 +2,18 @@ package rule
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/ncarlier/apimon/pkg/config"
 )
 
 // CreateValidatorPipeline create a pipeline of rule validator regarding the definition
-func CreateValidatorPipeline(def string) ([]Validator, error) {
-	defs := strings.Split(def, ";")
-	pipeline := make([]Validator, len(defs))
-	for i, d := range defs {
-		validator, err := createValidator(d)
+func CreateValidatorPipeline(rules []config.Rule) ([]Validator, error) {
+	if len(rules) == 0 {
+		rules = []config.Rule{config.Rule{Name: "code", Spec: "200"}}
+	}
+	pipeline := make([]Validator, len(rules))
+	for i, rule := range rules {
+		validator, err := createValidator(rule)
 		if err != nil {
 			return pipeline, err
 		}
@@ -19,24 +22,18 @@ func CreateValidatorPipeline(def string) ([]Validator, error) {
 	return pipeline, nil
 }
 
-func createValidator(def string) (Validator, error) {
-	defParts := strings.SplitN(def, ":", 2)
-	if len(defParts) != 2 {
-		return nil, fmt.Errorf("rule is empty")
-	}
-	name := defParts[0]
-	param := defParts[1]
-	var rule Validator
+func createValidator(rule config.Rule) (Validator, error) {
+	var result Validator
 	var err error
-	switch name {
-	case "Code":
-		rule, err = newCodeValidator(param)
-	case "RegExp":
-		rule, err = newRegexpValidator(param)
-	case "JSONPath":
-		rule = newJSONPathValidator(param)
+	switch rule.Name {
+	case "code":
+		result, err = newCodeValidator(rule.Spec)
+	case "regexp":
+		result, err = newRegexpValidator(rule.Spec)
+	case "json-path":
+		result = newJSONPathValidator(rule.Spec)
 	default:
-		err = fmt.Errorf("unknown rule name: %s", name)
+		err = fmt.Errorf("unknown rule name: %s", rule.Name)
 	}
-	return rule, err
+	return result, err
 }

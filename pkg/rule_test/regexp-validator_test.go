@@ -5,30 +5,32 @@ import (
 	"testing"
 
 	"github.com/ncarlier/apimon/pkg/assert"
+	"github.com/ncarlier/apimon/pkg/config"
 	"github.com/ncarlier/apimon/pkg/rule"
 )
 
 var notmatch = fmt.Errorf("body does not match the RegExp")
 
 var regExpValidationTests = []struct {
-	rule     string
+	spec     string
 	body     string
 	expected error
 }{
-	{"RegExp:hello", "hello world", nil},
-	{"RegExp:(foo){2}", "foofoobar", nil},
-	{"RegExp:(foo){2}", "foobarbar", notmatch},
-	{"RegExp:foo", "bar", notmatch},
+	{"hello", "hello world", nil},
+	{"(foo){2}", "foofoobar", nil},
+	{"(foo){2}", "foobarbar", notmatch},
+	{"foo", "bar", notmatch},
 }
 
 func TestRegExpValidator(t *testing.T) {
 	for idx, tt := range regExpValidationTests {
-		pipeline, err := rule.CreateValidatorPipeline(tt.rule)
+		rules := []config.Rule{config.Rule{Name: "regexp", Spec: tt.spec}}
+		pipeline, err := rule.CreateValidatorPipeline(rules)
 		assert.Nil(t, err, "Pipeline creation should not fail")
 		assert.NotNil(t, pipeline, "Pipeline should be created")
 		assert.Equal(t, 1, len(pipeline), "Invalid validator pipeline")
 		validator := pipeline[0]
-		assert.Equal(t, "RegExp", validator.Name(), "Invalid validator name")
+		assert.Equal(t, "regexp", validator.Name(), "Invalid validator name")
 		actual := validator.Validate(200, nil, tt.body)
 		if (tt.expected == nil && actual != nil) ||
 			(actual == nil && tt.expected != nil) ||
@@ -39,6 +41,7 @@ func TestRegExpValidator(t *testing.T) {
 }
 
 func TestBadRegExpValidator(t *testing.T) {
-	_, err := rule.CreateValidatorPipeline("RegExp:(?!re)")
+	rules := []config.Rule{config.Rule{Name: "regexp", Spec: "(?!re)"}}
+	_, err := rule.CreateValidatorPipeline(rules)
 	assert.NotNil(t, err, "Pipeline creation should fail")
 }
