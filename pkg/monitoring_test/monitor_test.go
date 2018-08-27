@@ -42,8 +42,8 @@ func TestMonitorWithDefaultConfiguration(t *testing.T) {
 	assert.Equal(t, expectedTimeout, monitor.Timeout, "Unexpected monitor timeout")
 	assert.Equal(t, expectedInterval, monitor.Interval, "Unexpected monitor timeout")
 	assert.Equal(t, 1, len(monitor.Validators), "Unexpected number of validators")
-	assert.Equal(t, "code", monitor.Validators[0].Name, "Unexpected validator name")
-	assert.Equal(t, "200", monitor.Validators[0].Spec, "Unexpected validator spec")
+	assert.Equal(t, "code", monitor.Validators[0].Name(), "Unexpected validator name")
+	assert.Equal(t, "200", monitor.Validators[0].Spec(), "Unexpected validator spec")
 }
 
 func TestMonitorWithAdjustedConfiguration(t *testing.T) {

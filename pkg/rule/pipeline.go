@@ -32,6 +32,8 @@ func createValidator(rule config.Rule) (Validator, error) {
 		result, err = newRegexpValidator(rule.Spec)
 	case "json-path":
 		result = newJSONPathValidator(rule.Spec)
+	case "json-expr":
+		result = newJSONExprValidator(rule.Spec)
 	default:
 		err = fmt.Errorf("unknown rule name: %s", rule.Name)
 	}

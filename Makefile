@@ -41,12 +41,16 @@ clean:
 	-rm -rf release
 .PHONY: clean
 
-glide.lock:
-	echo "Installing dependencies ..."
-	glide install
+deps:
+	echo ">>> Installing dependencies ..."
+	cd $(APPBASE)/$(APPNAME) && dep ensure
+.PHONY: deps
+
+Gopkg.lock:
+	make deps
 
 ## Build executable
-build: glide.lock $(APPBASE)/$(APPNAME)
+build: Gopkg.lock $(APPBASE)/$(APPNAME)
 	-mkdir -p release
 	echo "Building: $(ARTEFACT) ..."
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(LDFLAGS) -o $(ARTEFACT)
