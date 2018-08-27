@@ -39,9 +39,6 @@ The configuration is a YAML similar to this:
 output:            # Output configuration
   type: stdout     # By default "stdout" but can also be "file://test.log" or "http://localhost:8086/write?db=test"
   format: influxdb # By default "influxdb" but can also be "json"
-  meta:
-    influxdb_metric_name: http_health_check
-user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0"
 proxy: http://proxy-internet.localnet:3128 # Global HTTP proxy to use. By default none
 healthcheck:            # Global healthcheck configuration
   interval: 5s          # By default 30s
@@ -83,32 +80,32 @@ You can also choose the output format:
   collector compatible with [InfluxDB][influxdb])
 - `json`: JSON format (when using [Elasticsearch][elasticsearch] like solution)
 
-Some output format can be configured with additional settings.
-For instance the `influxdb` format can be tuned to define the metric prefix by
-setting `influxdb_metric_name`.
+Here an example of a Grafana dashboard displaying metrics form APImon:
+
+![screenshot](screenshot.png)
 
 ### Healthcheck configuration
 
 You can configure the health check in a global way (for all monitors) by placing
 this section at the root level of the configuration file.
-If you configure the health check of a particular monitor, the configuration
+If you configure the health check of a specific monitor, the configuration
 applies upon the global one.
 
 A health check is defined like this:
 
 - `interval`: the waiting time between checks
 - `timeout`: the maximum time allowed for a check
-- `rules`: all validation rules (separated by semicolon)
+- `rules`: the list of validation rules
 
 A rule have the following structure:
 
 - `name`: rule name
 - `spec`: rule specification
 
-The rule's name selects the validator to be applied.
-And rule 's spec is the configuration of the validator.
+The name selects the validator to be applied.
+And spec is the configuration of the validator.
 
-Validators can be chained (it is a list).
+Validators are chained (using list order).
 The first failed validator stops the validation chain and the monitor is
 considered as DOWN.
 
@@ -117,8 +114,9 @@ considered as DOWN.
 Name   | Spec 
 -------|------
 `code` | Validates status code (ex: `200`)<br>Validates status code in a list (ex: `200,204,205`)<br>Validates status code within an interval (ex: `200-204`)
-`json-path` | Validates a JSON path of the body response (ex: `$.service[?(@.status == 'UP')]`)
-`regexp:` | Validates the body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
+`json-path` | Validates JSON response with a [JSON path][jsonpath-syntax] expression (ex: `$.service[?(@.status == 'UP')]`)
+`json-expr` | Validates JSON response with an [expression][expr-syntax] (ex: `service.status == "UP" && uptime < 100)]`)
+`regexp:` | Validates body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
 
 ## Usage
 
@@ -127,7 +125,7 @@ Type `apimon -help` to get the usage.
 Basically, all you have to do is to provide the configuration file either using
 the `-c` parameter or the standard input of the command.
 
-Here come examples of possible usage:
+Here come examples of possible usages:
 
 ```bash
 $ # Using the defaul configuration file: `./configuration.yml`
@@ -159,14 +157,14 @@ $ cat conf.yml | apimon -o output.log | nc -C -w 1 -u localhost 8125
 
 ### I am using Elasticsearch
 
-You can either send the metrics (with JSON format) directly to Elasticsearch:
+You can either send the metrics (using JSON format as output configuration!) directly to Elasticsearch:
 
 ```bash
 $ apimon -c config.yml -o output.log | curl -X POST - -d @- http://localhost:9200/index/doc
 $ # You can also directly use the HTTP output provider into the APIMon configuration
 ```
 
-or use [Logstash][logstash] to collect the JSON outputs:
+or better: use [Logstash][logstash] to collect the JSON outputs:
 
 ```
 input {
@@ -177,10 +175,29 @@ input {
   }
 }
 ```
-
-> Note: Don't forget to use JSON format as output configuration!
-
 ---
+
+This software is under MIT License (MIT)
+
+Copyright (c) 2018 Nicolas Carlier
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 [elasticsearch]: https://www.elastic.co/products/elasticsearch
 [logstash]: https://www.elastic.co/products/logstash
@@ -188,3 +205,5 @@ input {
 [influxdb-line-protocol]: https://docs.influxdata.com/influxdb/v1.4/write_protocols/line_protocol_tutorial/
 [influxdb-exporter]: https://github.com/prometheus/influxdb_exporter
 [regexp-syntax]: https://golang.org/pkg/regexp/syntax/
+[expr-syntax]: https://github.com/antonmedv/expr/wiki/The-Expression-Syntax
+[jsonpath-syntax]: http://goessner.net/articles/JsonPath/index.html
