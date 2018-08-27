@@ -1,5 +1,22 @@
 <a name=""></a>
-#  (2018-02-08)
+#  (2018-08-27)
+
+
+
+<a name="1.0.0-rc"></a>
+# [1.0.0-rc](https://github.com/ncarlier/apimon/compare/1.0.0-beta.2...1.0.0-rc) (2018-08-27)
+
+
+### Bug Fixes
+
+* **influxdb:** write status as int value ([7c89502](https://github.com/ncarlier/apimon/commit/7c89502))
+
+
+### Features
+
+* add JSON expr validator ([0e46523](https://github.com/ncarlier/apimon/commit/0e46523))
+* add proxy and unsafe configuration ([d4906ac](https://github.com/ncarlier/apimon/commit/d4906ac))
+* configure rules as a list ([31352ee](https://github.com/ncarlier/apimon/commit/31352ee))
 
 
 
