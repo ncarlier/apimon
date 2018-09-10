@@ -1,16 +1,22 @@
-package metric
+package format
 
 import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/ncarlier/apimon/pkg/model"
 )
+
+func newInfluxDBMetricFormatter() (*InfluxDBMetricFormatter, error) {
+	return &InfluxDBMetricFormatter{}, nil
+}
 
 // InfluxDBMetricFormatter InfluxDB metric formatter
 type InfluxDBMetricFormatter struct{}
 
 // Format a metric to a InfluxDB string
-func (f *InfluxDBMetricFormatter) Format(metric Metric) string {
+func (f *InfluxDBMetricFormatter) Format(metric model.Metric) string {
 	var status int8
 	if metric.Status == "UP" {
 		status = 1

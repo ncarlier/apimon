@@ -1,19 +1,22 @@
-package metric
+package writer
 
 import (
 	"errors"
 	"fmt"
 	"net/url"
+
+	"github.com/ncarlier/apimon/pkg/model"
+	"github.com/ncarlier/apimon/pkg/output/format"
 )
 
 // Writer that write array byte to a custom output
 type Writer interface {
-	Write(metric Metric) error
+	Write(metric model.Metric) error
 	Close() error
 }
 
-func getMetricWriter(target, format string) (Writer, error) {
-	formatter, err := getMetricFormatter(format)
+func NewOutputWriter(target, _format string) (Writer, error) {
+	formatter, err := format.NewMetricFormatter(_format)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get metric formatter: %s", err)
 	}
@@ -29,7 +32,7 @@ func getMetricWriter(target, format string) (Writer, error) {
 			return nil, err
 		}
 	default:
-		return nil, errors.New("non supported metric writer: " + target)
+		return nil, errors.New("unsupported output writer: " + target)
 	}
 	return writer, nil
 }

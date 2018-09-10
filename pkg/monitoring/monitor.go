@@ -14,7 +14,8 @@ import (
 
 	"github.com/ncarlier/apimon/pkg/config"
 	"github.com/ncarlier/apimon/pkg/logger"
-	"github.com/ncarlier/apimon/pkg/metric"
+	"github.com/ncarlier/apimon/pkg/model"
+	"github.com/ncarlier/apimon/pkg/output"
 	"github.com/ncarlier/apimon/pkg/rule"
 )
 
@@ -126,7 +127,7 @@ func (m Monitor) Start() {
 			} else {
 				name = m.URL.String()
 			}
-			_metric := &metric.Metric{
+			_metric := &model.Metric{
 				Name:      name,
 				Status:    "UP",
 				Timestamp: time.Now(),
@@ -138,7 +139,7 @@ func (m Monitor) Start() {
 				_metric.Error = err.Error()
 			}
 			logger.Debug.Printf("monitor %s#%d: %s\n", m.Alias, m.ID, _metric)
-			metric.Queue <- *_metric
+			output.Queue <- *_metric
 		}
 	}()
 

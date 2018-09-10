@@ -1,18 +1,21 @@
-package metric
+package writer
 
 import (
 	"bytes"
 	"fmt"
 	"net/http"
+
+	"github.com/ncarlier/apimon/pkg/model"
+	"github.com/ncarlier/apimon/pkg/output/format"
 )
 
 // HTTPWriter HTTP writer
 type HTTPWriter struct {
-	Formatter Formatter
+	Formatter format.Formatter
 	URL       string
 }
 
-func newHTTPWriter(url string, formatter Formatter) *HTTPWriter {
+func newHTTPWriter(url string, formatter format.Formatter) *HTTPWriter {
 	return &HTTPWriter{
 		Formatter: formatter,
 		URL:       url,
@@ -20,7 +23,7 @@ func newHTTPWriter(url string, formatter Formatter) *HTTPWriter {
 }
 
 // Write post metric to HTTP endpoint
-func (w *HTTPWriter) Write(metric Metric) error {
+func (w *HTTPWriter) Write(metric model.Metric) error {
 	contentType := w.Formatter.ContentType()
 	body := w.Formatter.Format(metric)
 	resp, err := http.Post(w.URL, contentType, bytes.NewBufferString(body))

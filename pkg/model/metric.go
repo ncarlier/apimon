@@ -1,14 +1,9 @@
-package metric
+package model
 
 import (
 	"fmt"
 	"time"
-
-	"github.com/ncarlier/apimon/pkg/config"
 )
-
-// Queue metric queue
-var Queue = make(chan Metric)
 
 // Metric DTO
 type Metric struct {
@@ -33,22 +28,4 @@ func (m Metric) String() string {
 		m.Status,
 		m.Duration,
 		m.Timestamp)
-}
-
-var producer *Producer
-
-// StartMetricProducer start metric producer
-func StartMetricProducer(conf config.Output) error {
-	var err error
-	producer, err = NewMetricProducer(conf)
-	if err != nil {
-		return fmt.Errorf("unable to start metric producer: %s - %s", conf.Target, err)
-	}
-	producer.Start()
-	return nil
-}
-
-// StopMetricProducer stops metric producer
-func StopMetricProducer() {
-	producer.Stop()
 }

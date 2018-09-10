@@ -1,20 +1,23 @@
-package metric
+package writer
 
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/ncarlier/apimon/pkg/model"
+	"github.com/ncarlier/apimon/pkg/output/format"
 )
 
 // FileWriter writes metric to file
 type FileWriter struct {
-	Formatter Formatter
+	Formatter format.Formatter
 	File      *os.File
 	Writer    *bufio.Writer
 }
 
-func newFileWriter(target string, formatter Formatter) (*FileWriter, error) {
+func newFileWriter(target string, formatter format.Formatter) (*FileWriter, error) {
 	file, err := os.Create(strings.TrimPrefix(target, "file://"))
 	if err != nil {
 		return nil, err
@@ -29,7 +32,7 @@ func newFileWriter(target string, formatter Formatter) (*FileWriter, error) {
 }
 
 // Write writes metric to file
-func (w *FileWriter) Write(metric Metric) error {
+func (w *FileWriter) Write(metric model.Metric) error {
 	fmt.Fprintln(w.Writer, w.Formatter.Format(metric))
 	return nil
 }

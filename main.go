@@ -12,8 +12,8 @@ import (
 
 	"github.com/ncarlier/apimon/pkg/config"
 	"github.com/ncarlier/apimon/pkg/logger"
-	"github.com/ncarlier/apimon/pkg/metric"
 	"github.com/ncarlier/apimon/pkg/monitoring"
+	"github.com/ncarlier/apimon/pkg/output"
 )
 
 // Version of the app
@@ -21,12 +21,13 @@ var Version = "snapshot"
 
 var (
 	healthy int32
+	op      *output.Provider
 )
 
 var (
 	version    = flag.Bool("version", false, "Print version")
 	help       = flag.Bool("help", false, "Print this help screen")
-	output     = flag.String("o", "", "Logging output file (default STDOUT)")
+	out        = flag.String("o", "", "Logging output file (default STDOUT)")
 	debug      = flag.Bool("debug", false, "Activate debug logging level")
 	verbose    = flag.Bool("verbose", false, "Activate verbose logging level")
 	configFile = flag.String("c", "configuration.yml", "Configuration file")
@@ -60,8 +61,8 @@ Written by Nicolas Carlier.`, Version)
 	}
 
 	// Setup logger
-	if *output != "" {
-		f, err := os.OpenFile(*output, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if *out != "" {
+		f, err := os.OpenFile(*out, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			logger.Error.Panicln("unable to init the logger", err)
 		}
@@ -88,8 +89,9 @@ Written by Nicolas Carlier.`, Version)
 		if err := monitoring.StopMonitoring(ctx); err != nil {
 			logger.Error.Fatalf("could not gracefully shutdown the daemon: %v\n", err)
 		}
-		metric.StopMetricProducer()
-
+		if op != nil {
+			op.Stop()
+		}
 		close(done)
 	}()
 
@@ -120,11 +122,12 @@ Written by Nicolas Carlier.`, Version)
 		logger.Error.Panicln("unable to load the configuration", err)
 	}
 
-	// Start metric producer
-	err = metric.StartMetricProducer(c.Output)
+	// Create and start output provider
+	op, err = output.NewOutputProvider(c.Output)
 	if err != nil {
 		logger.Error.Panicln(err)
 	}
+	op.Start()
 
 	// Start all monitors...
 	monitoring.StartMonitoring(*c)
