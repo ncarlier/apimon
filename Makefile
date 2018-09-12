@@ -22,7 +22,7 @@ ARTEFACT=release/$(APPNAME)-$(GOOS)-$(GOARCH)$(EXT)
 
 # Extract version infos
 VERSION:=`git describe --tags`
-LDFLAGS=-ldflags "-X $(AUTHOR)/$(APPNAME)/main.Version=${VERSION}"
+LDFLAGS=-ldflags "-X main.Version=${VERSION}"
 
 all: build
 
