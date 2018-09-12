@@ -1,22 +1,23 @@
 <a name=""></a>
-#  (2018-08-27)
+#  (2018-09-12)
 
 
 
-<a name="1.0.0-rc"></a>
-# [1.0.0-rc](https://github.com/ncarlier/apimon/compare/1.0.0-beta.2...1.0.0-rc) (2018-08-27)
+<a name="1.0.0-rc.2"></a>
+# [1.0.0-rc.2](https://github.com/ncarlier/apimon/compare/1.0.0-beta.2...1.0.0-rc.2) (2018-09-12)
 
 
 ### Bug Fixes
 
-* **influxdb:** write status as int value ([7c89502](https://github.com/ncarlier/apimon/commit/7c89502))
+* **influxdb:** write status as int value ([738d193](https://github.com/ncarlier/apimon/commit/738d193))
 
 
 ### Features
 
-* add JSON expr validator ([0e46523](https://github.com/ncarlier/apimon/commit/0e46523))
-* add proxy and unsafe configuration ([d4906ac](https://github.com/ncarlier/apimon/commit/d4906ac))
-* configure rules as a list ([31352ee](https://github.com/ncarlier/apimon/commit/31352ee))
+* add JSON expr validator ([a160ee6](https://github.com/ncarlier/apimon/commit/a160ee6))
+* add proxy and unsafe configuration ([413e57d](https://github.com/ncarlier/apimon/commit/413e57d))
+* configure rules as a list ([cc3bf62](https://github.com/ncarlier/apimon/commit/cc3bf62))
+* **output:** add Prometheus output ([4b810f6](https://github.com/ncarlier/apimon/commit/4b810f6))
 
 
 
