@@ -43,12 +43,11 @@ func main() {
 
 	if *version {
 		fmt.Printf(`apimon (%s)
-Copyright (C) 2018 Nunux, Org.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
+Copyright (C) 2018 Nicolas Carlier. All rights reserved.
 
-Written by Nicolas Carlier.`, Version)
+This work is licensed under the terms of the MIT license.  
+For a copy, see <https://opensource.org/licenses/MIT>.
+`, Version)
 		os.Exit(0)
 	}
 
