@@ -30,6 +30,7 @@ all: build
 root_dir:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 makefiles:=$(root_dir)/makefiles
 include $(makefiles)/help.Makefile
+include $(makefiles)/docker/compose.Makefile
 
 $(APPBASE)/$(APPNAME):
 	echo "Creating GO src link: $(APPBASE)/$(APPNAME) ..."
@@ -93,3 +94,11 @@ distribution:
 	GOOS=darwin make build gzip
 	GOOS=windows make build gzip
 .PHONY: distribution
+
+## Deploy Docker stack
+deploy: compose-up 
+.PHONY: deploy
+
+## Un-deploy Docker stack
+undeploy: compose-down
+.PHONY: undeploy

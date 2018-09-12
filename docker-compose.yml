@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  #######################################
+  # Prometheus
+  #######################################
+  prom:
+    image: "prom/prometheus"
+    restart: always
+    ports:
+      - "${PORT:-9090}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  #######################################
+  # APImon
+  #######################################
+  apimon:
+    image: "ncarlier/apimon"
+    restart: always
+    volumes:
+      - ./configuration.yml:/configuration.yml

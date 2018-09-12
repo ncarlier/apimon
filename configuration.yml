@@ -1,8 +1,6 @@
 output:
-  target: stdout
-  format: influxdb
-  meta:
-    influxdb_metric_name: http_health_check
+  target: http://0.0.0.0:9090/metrics
+  format: prometheus
 user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0"
 proxy: http://proxy-internet.localnet:3128/
 healthcheck:

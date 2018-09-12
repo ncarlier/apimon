@@ -4,8 +4,8 @@
 [![Image size](https://images.microbadger.com/badges/image/ncarlier/apimon.svg)](https://microbadger.com/images/ncarlier/apimon)
 [![Docker pulls](https://img.shields.io/docker/pulls/ncarlier/apimon.svg)](https://hub.docker.com/r/ncarlier/apimon/)
 
-APImon is a simple tool for monitoring HTTP endpoints and sending metrics to a
-robust monitoring platform (such as TICK, ELK, etc.).
+APImon is a simple tool to monitor HTTP endpoints and send metrics to a
+robust monitoring platform (such as TICK, Prometheus, ELK, etc.).
 
 ![Logo](apimon.svg)
 
@@ -33,12 +33,12 @@ $ docker run -d --name=apimon \
 
 ## Configuration
 
-The configuration is a YAML similar to this:
+The configuration is a YAML file structured like this:
 
 ```yaml
 output:            # Output configuration
-  type: stdout     # By default "stdout" but can also be "file://test.log" or "http://localhost:8086/write?db=test"
-  format: influxdb # By default "influxdb" but can also be "json"
+  traget: stdout   # By default "stdout"
+  format: influxdb # By default "influxdb"
 proxy: http://proxy-internet.localnet:3128 # Global HTTP proxy to use. By default none
 healthcheck:            # Global healthcheck configuration
   interval: 5s          # By default 30s
@@ -46,8 +46,8 @@ healthcheck:            # Global healthcheck configuration
   rules:                # By default "code: 200"
     - name: code
       spec: 200-299
-monitors: # Monitors configuration
-  - alias: nunux-keeper-api
+monitors: # List of monitors configuration
+  - alias: nunux-keeper-api # The name used within the produced metrics. By default the URL
     url: https://api.nunux.org/keeper/ # The URL to monitor
     unsafe: true # Don't check SSL certificate. By default false
     proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use (overide global). By default none
@@ -63,13 +63,15 @@ monitors: # Monitors configuration
 
 ### Output configuration
 
-This configuration section allows you to configure the target output
+This configuration section allows you to set the targeted output
 (i. e. your monitoring platform).
 
 - `stdout`: Prints metrics to the STDOUT.
 - `file://test.log`: Writes metrics to a log file.
-- `http://...`: Post metrics to an HTTP endpoint (such as [InfluxDb][influxdb],
-  [Elasticsearch][elasticsearch], ...)
+- `http://...`:
+  - Post metrics to an HTTP endpoint such as [InfluxDb][influxdb],
+  [Elasticsearch][elasticsearch], etc. (Push Mode)
+  - OR serve metrics on this HTTP endpoint if `prometheus` format is used (Pull mode)
 
 > Note: When you are using `stdout` you should use the logging output flag
 > (`-o`) in order to not mix metrics and logs outputs.
@@ -79,10 +81,12 @@ You can also choose the output format:
 - `influxdb`: [InfluxDb line protocol][influxdb-line-protocol] (when using a
   collector compatible with [InfluxDB][influxdb])
 - `json`: JSON format (when using [Elasticsearch][elasticsearch] like solution)
+- `prometheus`: when using [Prometheus][prometheus] as collector
 
-Here an example of a Grafana dashboard displaying metrics form APImon:
-
-![screenshot](screenshot.png)
+> Note: When using `prometheus` format the output configuration must be a local
+> HTTP endpoint.
+> This endpoint will be mounted by APImon and you will be able to
+> [configure](./prometheus.yml) Prometheus to scrap this target.
 
 ### Healthcheck configuration
 
@@ -102,8 +106,8 @@ A rule have the following structure:
 - `name`: rule name
 - `spec`: rule specification
 
-The name selects the validator to be applied.
-And spec is the configuration of the validator.
+The `name` selects the validator to be applied.
+And `spec` is the configuration of the validator.
 
 Validators are chained (using list order).
 The first failed validator stops the validation chain and the monitor is
@@ -116,7 +120,7 @@ Name   | Spec
 `code` | Validates status code (ex: `200`)<br>Validates status code in a list (ex: `200,204,205`)<br>Validates status code within an interval (ex: `200-204`)
 `json-path` | Validates JSON response with a [JSON path][jsonpath-syntax] expression (ex: `$.service[?(@.status == 'UP')]`)
 `json-expr` | Validates JSON response with an [expression][expr-syntax] (ex: `service.status == "UP" && uptime < 100)]`)
-`regexp:` | Validates body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
+`regexp` | Validates body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
 
 ## Usage
 
@@ -137,13 +141,11 @@ $ cat conf.yml | apimon
 $ ...
 ```
 
+Here an example of a Grafana dashboard displaying metrics form APImon:
+
+![screenshot](screenshot.png)
+
 ## FAQ
-
-### I am using Prometheus
-
-And that's completely fine.
-You can use [InfluxDB Exporter][influxdb-exporter] to accepts InfluxDB metrics
-via HTTP API and exports theme via HTTP for Prometheus.
 
 ### I am using InfluxDB with UDP
 
@@ -157,7 +159,8 @@ $ cat conf.yml | apimon -o output.log | nc -C -w 1 -u localhost 8125
 
 ### I am using Elasticsearch
 
-You can either send the metrics (using JSON format as output configuration!) directly to Elasticsearch:
+You can either send the metrics (using JSON format as output configuration!)
+directly to Elasticsearch:
 
 ```bash
 $ apimon -c config.yml -o output.log | curl -X POST - -d @- http://localhost:9200/index/doc
@@ -203,7 +206,7 @@ SOFTWARE.
 [logstash]: https://www.elastic.co/products/logstash
 [influxdb]: https://github.com/influxdata/influxdb
 [influxdb-line-protocol]: https://docs.influxdata.com/influxdb/v1.4/write_protocols/line_protocol_tutorial/
-[influxdb-exporter]: https://github.com/prometheus/influxdb_exporter
+[prometheus]: https://prometheus.io/
 [regexp-syntax]: https://golang.org/pkg/regexp/syntax/
 [expr-syntax]: https://github.com/antonmedv/expr/wiki/The-Expression-Syntax
 [jsonpath-syntax]: http://goessner.net/articles/JsonPath/index.html

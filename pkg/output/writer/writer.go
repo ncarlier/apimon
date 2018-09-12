@@ -9,12 +9,13 @@ import (
 	"github.com/ncarlier/apimon/pkg/output/format"
 )
 
-// Writer that write array byte to a custom output
+// Writer is the interface of an output writer
 type Writer interface {
 	Write(metric model.Metric) error
 	Close() error
 }
 
+// NewOutputWriter creates new output writer
 func NewOutputWriter(target, _format string) (Writer, error) {
 	formatter, err := format.NewMetricFormatter(_format)
 	if err != nil {
@@ -22,6 +23,11 @@ func NewOutputWriter(target, _format string) (Writer, error) {
 	}
 	var writer Writer
 	switch {
+	case _format == "prometheus":
+		writer, err = newPrometheusWriter(target)
+		if err != nil {
+			return nil, err
+		}
 	case target == "", target == "stdout":
 		writer = newStdoutWriter(formatter)
 	case isValidURLWithScheme(target, "http") || isValidURLWithScheme(target, "https"):

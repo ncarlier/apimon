@@ -112,7 +112,7 @@ Written by Nicolas Carlier.`, Version)
 		logger.Debug.Printf("loading configuration: %s ...\n", *configFile)
 		confData, err = ioutil.ReadFile(*configFile)
 		if err != nil {
-			logger.Error.Panicln("unable to load the configuration from file:", *configFile, err)
+			logger.Error.Panicln("unable to load the configuration from file:", err)
 		}
 	}
 

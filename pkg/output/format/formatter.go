@@ -19,6 +19,8 @@ func NewMetricFormatter(format string) (Formatter, error) {
 		return newInfluxDBMetricFormatter()
 	case "json":
 		return newJSONMetricFormatter()
+	case "prometheus":
+		return newStringMetricFormatter()
 	default:
 		return nil, errors.New("non supported format: " + format)
 	}
