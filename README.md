@@ -121,6 +121,7 @@ Name   | Spec
 `json-path` | Validates JSON response with a [JSON path][jsonpath-syntax] expression (ex: `$.service[?(@.status == 'UP')]`)
 `json-expr` | Validates JSON response with an [expression][expr-syntax] (ex: `service.status == "UP" && uptime < 100)]`)
 `regexp` | Validates body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
+`cert` | Validates certificate expiration date is before N days (ex: `30`)
 
 ## Usage
 
