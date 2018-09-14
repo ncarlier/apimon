@@ -187,7 +187,7 @@ func (m Monitor) Validate() (time.Duration, error) {
 	}
 
 	for _, validator := range m.Validators {
-		if err = validator.Validate(resp.StatusCode, resp.Header, string(body)); err != nil {
+		if err = validator.Validate(string(body), resp); err != nil {
 			return time.Since(start), fmt.Errorf("RULE_%s: %s", strings.ToUpper(validator.Name()), err)
 		}
 	}

@@ -2,6 +2,7 @@ package rule_test
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/ncarlier/apimon/pkg/assert"
@@ -31,7 +32,7 @@ func TestCodeValidator(t *testing.T) {
 		assert.Equal(t, 1, len(pipeline), "Invalid validator pipeline")
 		validator := pipeline[0]
 		assert.Equal(t, "code", validator.Name(), "Invalid validator name")
-		actual := validator.Validate(tt.code, nil, "")
+		actual := validator.Validate("", &http.Response{StatusCode: tt.code})
 		if (tt.expected == nil && actual != nil) ||
 			(actual == nil && tt.expected != nil) ||
 			(actual != nil && tt.expected.Error() != actual.Error()) {

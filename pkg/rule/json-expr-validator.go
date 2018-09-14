@@ -29,7 +29,7 @@ func (v *jsonExprValidator) Spec() string {
 	return v.spec
 }
 
-func (v *jsonExprValidator) Validate(status int, headers http.Header, body string) error {
+func (v *jsonExprValidator) Validate(body string, resp *http.Response) error {
 	var m map[string]interface{}
 	err := json.Unmarshal([]byte(body), &m)
 	if err != nil {

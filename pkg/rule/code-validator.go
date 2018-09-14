@@ -46,16 +46,16 @@ func (v *codeValidator) Spec() string {
 	return v.spec
 }
 
-func (v *codeValidator) Validate(status int, headers http.Header, body string) error {
+func (v *codeValidator) Validate(body string, resp *http.Response) error {
 	if len(v.codes) > 0 {
 		for _, c := range v.codes {
-			if status == c {
+			if resp.StatusCode == c {
 				return nil
 			}
 		}
-		return fmt.Errorf("Unexpected status code: %d", status)
-	} else if status >= v.fromCode && status <= v.toCode {
+		return fmt.Errorf("Unexpected status code: %d", resp.StatusCode)
+	} else if resp.StatusCode >= v.fromCode && resp.StatusCode <= v.toCode {
 		return nil
 	}
-	return fmt.Errorf("Status out of range: %d", status)
+	return fmt.Errorf("Status out of range: %d", resp.StatusCode)
 }

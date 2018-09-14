@@ -37,7 +37,7 @@ func TestJSONExprValidator(t *testing.T) {
 		assert.Equal(t, 1, len(pipeline), "Invalid validator pipeline")
 		validator := pipeline[0]
 		assert.Equal(t, "expr", validator.Name(), "Invalid validator name")
-		actual := validator.Validate(200, nil, tt.body)
+		actual := validator.Validate(tt.body, nil)
 		if (tt.expected == nil && actual != nil) ||
 			(actual == nil && tt.expected != nil) ||
 			(actual != nil && tt.expected.Error() != actual.Error()) {

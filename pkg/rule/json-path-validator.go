@@ -29,7 +29,7 @@ func (v *jsonPathValidator) Spec() string {
 	return v.spec
 }
 
-func (v *jsonPathValidator) Validate(status int, headers http.Header, body string) error {
+func (v *jsonPathValidator) Validate(body string, resp *http.Response) error {
 	var jsonData interface{}
 	err := json.Unmarshal([]byte(body), &jsonData)
 	if err != nil {

@@ -33,7 +33,7 @@ func (v *regexpValidator) Spec() string {
 	return v.spec
 }
 
-func (v *regexpValidator) Validate(status int, headers http.Header, body string) error {
+func (v *regexpValidator) Validate(body string, resp *http.Response) error {
 	if v.re.MatchString(body) {
 		return nil
 	}

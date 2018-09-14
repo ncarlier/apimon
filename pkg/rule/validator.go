@@ -8,5 +8,5 @@ import (
 type Validator interface {
 	Name() string
 	Spec() string
-	Validate(status int, headers http.Header, body string) error
+	Validate(body string, resp *http.Response) error
 }
