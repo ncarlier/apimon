@@ -7,6 +7,8 @@ APPNAME=apimon
 GOOS?=linux
 GOARCH?=amd64
 
+export GO111MODULE=on
+
 # Add exe extension if windows target
 is_windows:=$(filter windows,$(GOOS))
 EXT:=$(if $(is_windows),".exe","")
@@ -42,7 +44,7 @@ $(ARTEFACT): build
 
 ## Run tests
 test:
-	go test `go list ./... | grep -v vendor`
+	go test ./...
 .PHONY: test
 
 ## Install executable
