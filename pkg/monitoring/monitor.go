@@ -171,6 +171,11 @@ func (m Monitor) Validate() (time.Duration, error) {
 			req.Header.Add(parts[0], parts[1])
 		}
 	}
+
+	if req.Header.Get("User-Agent") == "" {
+		req.Header.Set("User-Agent", "APImonPinger/1.0")
+	}
+
 	resp, err := m.Client.Do(req)
 	if err != nil {
 		matched, _ := regexp.MatchString("context canceled", err.Error())
