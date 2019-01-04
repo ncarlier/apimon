@@ -74,5 +74,4 @@ func toBool(i1 interface{}) bool {
 		}
 		return *i2 != 0
 	}
-	return false
 }
