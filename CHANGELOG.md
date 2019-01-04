@@ -1,5 +1,17 @@
 <a name=""></a>
-#  (2018-09-12)
+# [](https://github.com/ncarlier/apimon/compare/v1.0.0...v) (2019-01-04)
+
+
+
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/ncarlier/apimon/compare/1.0.0-rc.2...v1.0.0) (2019-01-04)
+
+
+### Features
+
+* add custom User-Agent ([59f3116](https://github.com/ncarlier/apimon/commit/59f3116))
+* add rule to check certificate expiration date ([3383fdc](https://github.com/ncarlier/apimon/commit/3383fdc))
+* update rule validation method signature ([0d19227](https://github.com/ncarlier/apimon/commit/0d19227))
 
 
 
