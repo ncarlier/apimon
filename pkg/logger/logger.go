@@ -19,16 +19,26 @@ var (
 )
 
 func init() {
-	Init("warn", os.Stdout, os.Stderr)
+	Configure("warn", "")
 }
 
-// Init logger level
-func Init(level string, out, err io.Writer) {
+// Configure logger
+func Configure(level, output string) error {
+	outWriter := os.Stdout
+	errWriter := os.Stderr
+	if output != "" {
+		outWriter, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		errWriter = outWriter
+	}
+
 	var debugHandle, infoHandle, warnHandle, errorHandle io.Writer
-	debugHandle = out
-	infoHandle = out
-	warnHandle = err
-	errorHandle = err
+	debugHandle = outWriter
+	infoHandle = outWriter
+	warnHandle = errWriter
+	errorHandle = errWriter
 	switch level {
 	case "info":
 		debugHandle = ioutil.Discard
@@ -45,4 +55,5 @@ func Init(level string, out, err io.Writer) {
 	Info = log.New(infoHandle, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	Warning = log.New(warnHandle, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
 	Error = log.New(errorHandle, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	return nil
 }

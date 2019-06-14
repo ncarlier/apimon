@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ncarlier/apimon/pkg/config"
@@ -32,34 +31,33 @@ type Monitor struct {
 	Interval   time.Duration
 	Timeout    time.Duration
 	Validators []rule.Validator
-	StopChan   chan struct{}
-	WaitGroup  *sync.WaitGroup
+	Ticker     *time.Ticker
 }
 
 // NewMonitor create a new monitor
-func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGroup) (*Monitor, error) {
+func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 	// Parse the interval...
 	interval, err := time.ParseDuration(conf.Healthcheck.Interval)
 	if err != nil {
-		logger.Warning.Printf("Unable to parse healthcheck interval: '%s'. Using default: %s", conf.Healthcheck.Interval, defaultDuration)
+		logger.Warning.Printf("unable to parse healthcheck interval: '%s'. Using default: %s", conf.Healthcheck.Interval, defaultDuration)
 		interval = defaultDuration
 	}
 
 	// Parse the timeout...
 	timeout, err := time.ParseDuration(conf.Healthcheck.Timeout)
 	if err != nil {
-		logger.Warning.Printf("Unable to parse timeout: '%s'. Using default: %s", conf.Healthcheck.Timeout, defaultTimeout)
+		logger.Warning.Printf("unable to parse timeout: '%s'. Using default: %s", conf.Healthcheck.Timeout, defaultTimeout)
 		timeout = defaultTimeout
 	}
 	if timeout >= interval {
-		logger.Warning.Printf("Timeout can't be longer than the interval: %s > %s. Adjusting timeout.", timeout, interval)
+		logger.Warning.Printf("timeout can't be longer than the interval: %s > %s. Adjusting timeout.", timeout, interval)
 		timeout = interval - time.Duration(100)*time.Millisecond
 	}
 
 	// Parse the URL
 	u, err := url.ParseRequestURI(conf.URL)
 	if err != nil {
-		logger.Error.Printf("Unable to parse URL: '%s'", conf.URL)
+		logger.Error.Printf("unable to parse URL: '%s'", conf.URL)
 		return nil, err
 	}
 
@@ -69,7 +67,7 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 	if conf.Proxy != "" {
 		proxyURL, err := url.ParseRequestURI(conf.Proxy)
 		if err != nil {
-			logger.Error.Printf("Unable to parse Proxy URL: '%s'", conf.Proxy)
+			logger.Error.Printf("unable to parse proxy URL: '%s'", conf.Proxy)
 			return nil, err
 		}
 		transport.Proxy = http.ProxyURL(proxyURL)
@@ -82,7 +80,7 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 	// Parse validators
 	validators, err := rule.CreateValidatorPipeline(conf.Healthcheck.Rules)
 	if err != nil {
-		logger.Error.Printf("Unable to parse healthcheck rules: '%s'", conf.Healthcheck.Rules)
+		logger.Error.Printf("unable to parse healthcheck rules: '%s'", conf.Healthcheck.Rules)
 		return nil, err
 	}
 
@@ -96,10 +94,8 @@ func NewMonitor(id int, conf config.Monitor, stop chan struct{}, wg *sync.WaitGr
 		Timeout:    timeout,
 		Validators: validators,
 		Headers:    conf.Headers,
-		StopChan:   stop,
-		WaitGroup:  wg,
 	}
-	logger.Debug.Printf("Monitor created: %s\n", monitor)
+	logger.Debug.Printf("monitor created: %s\n", monitor)
 
 	return &monitor, nil
 }
@@ -115,12 +111,12 @@ func (m Monitor) String() string {
 		m.Timeout)
 }
 
-// Start start the monitor
-func (m Monitor) Start() {
-	logger.Debug.Printf("Starting monitor %s#%d...\n", m.Alias, m.ID)
-	ticker := time.NewTicker(m.Interval)
+// Start the monitor
+func (m *Monitor) Start() {
+	logger.Debug.Printf("starting monitor %s#%d...\n", m.Alias, m.ID)
+	m.Ticker = time.NewTicker(m.Interval)
 	go func() {
-		for range ticker.C {
+		for range m.Ticker.C {
 			var name string
 			if m.Alias != "" {
 				name = m.Alias
@@ -142,17 +138,16 @@ func (m Monitor) Start() {
 			output.Queue <- *_metric
 		}
 	}()
+}
 
-	go func() {
-		<-m.StopChan
-		ticker.Stop()
-		logger.Debug.Printf("Stopping monitor %s#%d...\n", m.Alias, m.ID)
-		wg.Done()
-	}()
+// Stop the monitor
+func (m *Monitor) Stop() {
+	m.Ticker.Stop()
+	logger.Debug.Printf("monitor %s#%d stopped\n", m.Alias, m.ID)
 }
 
 // Validate the monitor endpoint by aplying all validators
-func (m Monitor) Validate() (time.Duration, error) {
+func (m *Monitor) Validate() (time.Duration, error) {
 	start := time.Now()
 	ctx, cancel := context.WithCancel(context.TODO())
 	timer := time.AfterFunc(m.Timeout, func() {

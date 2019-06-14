@@ -31,14 +31,14 @@ func NewOutputProvider(conf config.Output) (*Provider, error) {
 
 // Start starts output provider
 func (p *Provider) Start() {
-	logger.Debug.Println("Starting output provider...")
+	logger.Debug.Println("starting output provider...")
 	go func() {
 		for {
 			select {
 			case metric := <-Queue:
 				err := p.Writer.Write(metric)
 				if err != nil {
-					logger.Error.Println("Unable to write metric:", err)
+					logger.Error.Println("unable to write metric:", err)
 				}
 			case <-p.QuitChan:
 				return
@@ -49,7 +49,7 @@ func (p *Provider) Start() {
 
 // Stop stops metric provider
 func (p *Provider) Stop() {
-	logger.Debug.Println("Stopping output provider...")
 	p.QuitChan <- true
 	p.Writer.Close()
+	logger.Debug.Println("output provider stopped")
 }

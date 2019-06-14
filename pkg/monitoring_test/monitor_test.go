@@ -1,7 +1,6 @@
 package monitoring_test
 
 import (
-	"sync"
 	"testing"
 	"time"
 
@@ -9,9 +8,6 @@ import (
 	"github.com/ncarlier/apimon/pkg/config"
 	"github.com/ncarlier/apimon/pkg/monitoring"
 )
-
-var stop = make(chan struct{})
-var wg sync.WaitGroup
 
 func TestMonitorWithBadURLConfiguration(t *testing.T) {
 	conf := &config.Monitor{
@@ -24,7 +20,7 @@ func TestMonitorWithBadURLConfiguration(t *testing.T) {
 	}
 
 	expected := "parse foo: invalid URI for request"
-	_, err := monitoring.NewMonitor(0, *conf, stop, &wg)
+	_, err := monitoring.NewMonitor(0, *conf)
 	assert.NotNil(t, err, "Monitor creation should fail")
 	assert.Equal(t, expected, err.Error(), "Unexpected error")
 }
@@ -36,7 +32,7 @@ func TestMonitorWithDefaultConfiguration(t *testing.T) {
 		URL: "http://foo",
 	}
 
-	monitor, err := monitoring.NewMonitor(0, *conf, stop, &wg)
+	monitor, err := monitoring.NewMonitor(0, *conf)
 	assert.Nil(t, err, "Monitor creation should not fail")
 	assert.NotNil(t, monitor, "Monitor should be created")
 	assert.Equal(t, expectedTimeout, monitor.Timeout, "Unexpected monitor timeout")
@@ -60,7 +56,7 @@ func TestMonitorWithAdjustedConfiguration(t *testing.T) {
 		},
 	}
 
-	monitor, err := monitoring.NewMonitor(0, *conf, stop, &wg)
+	monitor, err := monitoring.NewMonitor(0, *conf)
 	assert.Nil(t, err, "Monitor creation should not fail")
 	assert.NotNil(t, monitor, "Monitor should be created")
 	assert.Equal(t, expectedTimeout, monitor.Timeout, "Unexpected monitor timeout")

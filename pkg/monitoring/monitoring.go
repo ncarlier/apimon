@@ -2,43 +2,63 @@ package monitoring
 
 import (
 	"context"
-	"sync"
 
 	"github.com/ncarlier/apimon/pkg/config"
 	"github.com/ncarlier/apimon/pkg/logger"
 )
 
-var stop = make(chan struct{})
-var wg sync.WaitGroup
+// Monitoring structure
+type Monitoring struct {
+	conf     config.Config
+	monitors []*Monitor
+}
 
-// StartMonitoring is charged to start all monitors.
-func StartMonitoring(conf config.Config) error {
+// NewMonitoring creates new monitoring instance
+func NewMonitoring(conf config.Config) *Monitoring {
+	return &Monitoring{
+		conf: conf,
+	}
+}
+
+// Start is charged to start all monitors
+func (m *Monitoring) Start() error {
 	// Now, create all of our monitors.
-	for i := 0; i < len(conf.Monitors); i++ {
+	for i := 0; i < len(m.conf.Monitors); i++ {
 		// Get monitor configuration
-		mConfig := conf.Monitors[i]
+		mConfig := m.conf.Monitors[i]
 		// Apply global configuration
-		mConfig.Healthcheck = config.MergeHealthcheckConfig(conf.Healthcheck, mConfig.Healthcheck)
+		mConfig.Healthcheck = config.MergeHealthcheckConfig(m.conf.Healthcheck, mConfig.Healthcheck)
 		// Apply proxy configuration
 		if mConfig.Proxy == "" {
-			mConfig.Proxy = conf.Proxy
+			mConfig.Proxy = m.conf.Proxy
 		}
 		// Create new monitor
-		worker, err := NewMonitor(i+1, mConfig, stop, &wg)
+		monitor, err := NewMonitor(i+1, mConfig)
 		if err != nil {
-			logger.Error.Println("Unable to create monitor", err)
+			logger.Error.Println("unable to create monitor", err)
 			continue
 		}
 		// Start the monitor
-		worker.Start()
-		wg.Add(1)
+		monitor.Start()
+		m.monitors = append(m.monitors, monitor)
 	}
 	return nil
 }
 
-// StopMonitoring is charged to stop all monitors.
-func StopMonitoring(ctx context.Context) error {
-	close(stop)
-	wg.Wait()
-	return nil
+// Stop is charged to stop all monitors
+func (m *Monitoring) Stop(ctx context.Context) error {
+	c := make(chan struct{})
+	go func() {
+		defer close(c)
+		for _, monitor := range m.monitors {
+			monitor.Stop()
+		}
+	}()
+
+	select {
+	case <-c:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }

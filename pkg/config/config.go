@@ -1,29 +1,33 @@
 package config
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
+
 	"gopkg.in/yaml.v2"
 )
 
-// Output configuration of the output channel
+// Output configuration
 type Output struct {
 	Target string `yaml:"target"`
 	Format string `yaml:"format"`
 }
 
-// Rule configuration of a validation rule
+// Rule configuration
 type Rule struct {
 	Name string `yaml:"name"`
 	Spec string `yaml:"spec"`
 }
 
-// Healthcheck configuration of a healthcheck
+// Healthcheck configuration
 type Healthcheck struct {
 	Interval string `yaml:"interval"`
 	Timeout  string `yaml:"timeout"`
 	Rules    []Rule `yaml:"rules"`
 }
 
-// Monitor configuration of a monitor
+// Monitor configuration
 type Monitor struct {
 	Alias       string      `yaml:"alias"`
 	URL         string      `yaml:"url"`
@@ -33,23 +37,50 @@ type Monitor struct {
 	Unsafe      bool        `yaml:"unsafe"`
 }
 
-// Config configuration structure
+// Config is the base configuration structure
 type Config struct {
 	Output      Output      `yaml:"output"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
 	Proxy       string      `yaml:"proxy"`
+	MonitorsURI string      `yaml:"monitors_uri"`
 	Monitors    []Monitor   `yaml:"monitors"`
 }
 
-// LoadConfig create new configuration object form a YAML file
-func LoadConfig(data []byte) (*Config, error) {
+func newConfig(data []byte) (*Config, error) {
 	config := Config{}
 	err := yaml.Unmarshal(data, &config)
 	if err != nil {
+		err = fmt.Errorf("unable to read configuration: %s", err.Error())
 		return nil, err
 	}
-
 	return &config, nil
+}
+
+// Load create new configuration object form a YAML source
+func Load(configFilename string) (*Config, error) {
+
+	// Try to load the configuration from STDIN...
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		err = fmt.Errorf("unable to load configuration from STDIN: %s", err.Error())
+		return nil, err
+	}
+	if fi.Mode()&os.ModeNamedPipe != 0 && fi.Size() > 0 {
+		data, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			err = fmt.Errorf("unable to load configuration from STDIN: %s", err.Error())
+			return nil, err
+		}
+		return newConfig(data)
+	}
+
+	// Try to load configuration from file...
+	data, err := ioutil.ReadFile(configFilename)
+	if err != nil {
+		err = fmt.Errorf("unable to load configuration from file (%s): %s", configFilename, err.Error())
+		return nil, err
+	}
+	return newConfig(data)
 }
 
 // MergeHealthcheckConfig merge a healthcheck configuration with another

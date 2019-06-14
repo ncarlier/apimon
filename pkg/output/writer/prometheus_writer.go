@@ -14,13 +14,19 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var healthCheckSummary = prometheus.NewSummaryVec(
-	prometheus.SummaryOpts{
-		Name:       "http_health_check",
-		Help:       "HTTP health check status.",
-		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+var healthCheckStatusGauge = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "http_health_check_status",
+		Help: "HTTP health check status.",
 	},
-	[]string{"name", "status", "reason"},
+	[]string{"name", "reason"},
+)
+var healthCheckResponseTimeGauge = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "http_health_check_response_time",
+		Help: "HTTP health check response time.",
+	},
+	[]string{"name"},
 )
 
 // PrometheusWriter writes data to Prometheus endpoint
@@ -33,7 +39,8 @@ func newPrometheusWriter(uri string) (*PrometheusWriter, error) {
 	if err != nil || u.Scheme != "http" {
 		return nil, fmt.Errorf("invalid listen URL: %s", uri)
 	}
-	prometheus.MustRegister(healthCheckSummary)
+	prometheus.MustRegister(healthCheckStatusGauge)
+	prometheus.MustRegister(healthCheckResponseTimeGauge)
 	srv := &http.Server{Addr: u.Hostname() + ":" + u.Port()}
 	http.Handle(u.Path, promhttp.Handler())
 	go func() {
@@ -49,26 +56,23 @@ func newPrometheusWriter(uri string) (*PrometheusWriter, error) {
 
 // Write writes metric to Prometheus
 func (w *PrometheusWriter) Write(metric model.Metric) error {
-	status := "0"
+	status := 0.0
 	if metric.Status == "UP" {
-		status = "1"
+		status = 1.0
 	}
 	duration := float64(metric.Duration / time.Millisecond)
+	reason := ""
 	if metric.Error != "" {
-		reason := strings.SplitN(metric.Error, ":", 2)[0]
+		reason = strings.SplitN(metric.Error, ":", 2)[0]
 		reason = strings.ToLower(reason)
-		healthCheckSummary.With(prometheus.Labels{
-			"name":   metric.Name,
-			"status": status,
-			"reason": reason,
-		}).Observe(duration)
-	} else {
-		healthCheckSummary.With(prometheus.Labels{
-			"name":   metric.Name,
-			"status": status,
-			"reason": "",
-		}).Observe(duration)
 	}
+	healthCheckResponseTimeGauge.With(prometheus.Labels{
+		"name": metric.Name,
+	}).Set(duration)
+	healthCheckStatusGauge.With(prometheus.Labels{
+		"name":   metric.Name,
+		"reason": reason,
+	}).Set(status)
 	return nil
 }
 

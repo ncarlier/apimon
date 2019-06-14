@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
-	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/ncarlier/apimon/pkg/config"
@@ -15,9 +15,6 @@ import (
 	"github.com/ncarlier/apimon/pkg/monitoring"
 	"github.com/ncarlier/apimon/pkg/output"
 )
-
-// Version of the app
-var Version = "snapshot"
 
 var (
 	healthy int32
@@ -28,12 +25,16 @@ var (
 	version    = flag.Bool("version", false, "Print version")
 	help       = flag.Bool("help", false, "Print this help screen")
 	out        = flag.String("o", "", "Logging output file (default STDOUT)")
-	debug      = flag.Bool("debug", false, "Activate debug logging level")
-	verbose    = flag.Bool("verbose", false, "Activate verbose logging level")
-	configFile = flag.String("c", "configuration.yml", "Configuration file")
+	debug      = flag.Bool("vv", false, "Activate debug logging level")
+	verbose    = flag.Bool("v", false, "Activate verbose logging level")
+	configFile = flag.String("c", "./configuration.yml", "Configuration file (can also be provided with STDIN)")
 )
 
 func main() {
+	done := make(chan bool)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 	flag.Parse()
 
 	if *help {
@@ -42,12 +43,7 @@ func main() {
 	}
 
 	if *version {
-		fmt.Printf(`apimon (%s)
-Copyright (C) 2018 Nicolas Carlier. All rights reserved.
-
-This work is licensed under the terms of the MIT license.  
-For a copy, see <https://opensource.org/licenses/MIT>.
-`, Version)
+		printVersion()
 		os.Exit(0)
 	}
 
@@ -60,32 +56,39 @@ For a copy, see <https://opensource.org/licenses/MIT>.
 	}
 
 	// Setup logger
-	if *out != "" {
-		f, err := os.OpenFile(*out, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			logger.Error.Panicln("unable to init the logger", err)
-		}
-		logger.Init(level, f, f)
-		defer f.Close()
-	} else {
-		logger.Init(level, os.Stdout, os.Stderr)
+	if err := logger.Configure(level, *out); err != nil {
+		log.Panicln("unable to init the logger", err)
 	}
 
 	logger.Debug.Println("starting APImon...")
 
-	done := make(chan bool)
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	// Loading configuration...
+	c, err := config.Load(*configFile)
+	if err != nil {
+		logger.Error.Panicln("unable to load the configuration", err)
+	}
 
+	// Create and start output provider...
+	op, err = output.NewOutputProvider(c.Output)
+	if err != nil {
+		logger.Error.Panicln(err)
+	}
+	op.Start()
+
+	// Create and start monitoring...
+	mon := monitoring.NewMonitoring(*c)
+	mon.Start()
+
+	// Graceful shutdown
 	go func() {
 		<-quit
 		logger.Debug.Println("stoping APImon...")
 		atomic.StoreInt32(&healthy, 0)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		if err := monitoring.StopMonitoring(ctx); err != nil {
+		if err := mon.Stop(ctx); err != nil {
 			logger.Error.Fatalf("could not gracefully shutdown the daemon: %v\n", err)
 		}
 		if op != nil {
@@ -93,43 +96,6 @@ For a copy, see <https://opensource.org/licenses/MIT>.
 		}
 		close(done)
 	}()
-
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		panic(err)
-	}
-	var confData []byte
-	// Try to load the configuration...
-	if fi.Mode()&os.ModeNamedPipe != 0 && fi.Size() > 0 {
-		// ... form STDIN
-		confData, err = ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			logger.Error.Panicln("unable to load the configuration from stdin", err)
-		}
-	} else {
-		// ... from file parameter
-		logger.Debug.Printf("loading configuration: %s ...\n", *configFile)
-		confData, err = ioutil.ReadFile(*configFile)
-		if err != nil {
-			logger.Error.Panicln("unable to load the configuration from file:", err)
-		}
-	}
-
-	// Loading configuration...
-	c, err := config.LoadConfig(confData)
-	if err != nil {
-		logger.Error.Panicln("unable to load the configuration", err)
-	}
-
-	// Create and start output provider
-	op, err = output.NewOutputProvider(c.Output)
-	if err != nil {
-		logger.Error.Panicln(err)
-	}
-	op.Start()
-
-	// Start all monitors...
-	monitoring.StartMonitoring(*c)
 
 	logger.Info.Println("APImon started")
 	atomic.StoreInt32(&healthy, 1)
