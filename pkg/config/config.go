@@ -30,6 +30,7 @@ type Healthcheck struct {
 // Monitor configuration
 type Monitor struct {
 	Alias       string      `yaml:"alias"`
+	Disable     bool        `yaml:"disable"`
 	URL         string      `yaml:"url"`
 	Headers     []string    `yaml:"headers"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
@@ -42,7 +43,6 @@ type Config struct {
 	Output      Output      `yaml:"output"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
 	Proxy       string      `yaml:"proxy"`
-	MonitorsURI string      `yaml:"monitors_uri"`
 	Monitors    []Monitor   `yaml:"monitors"`
 }
 

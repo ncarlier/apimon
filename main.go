@@ -78,6 +78,7 @@ func main() {
 	// Create and start monitoring...
 	mon := monitoring.NewMonitoring(*c)
 	mon.Start()
+	go mon.RestartOnSDConfigChange()
 
 	// Graceful shutdown
 	go func() {

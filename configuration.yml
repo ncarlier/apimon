@@ -11,6 +11,7 @@ healthcheck:
       spec: 200-299
 monitors:
   - alias: nunux-keeper-api
+    disable: true
     url: https://api.nunux.org/keeper/
     unsafe: true
     headers:
@@ -20,4 +21,3 @@ monitors:
       rules:
         - name: code
           spec: 200
-  - url: https://reader.nunux.org
