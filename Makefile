@@ -30,13 +30,14 @@ include $(makefiles)/docker/compose.Makefile
 
 ## Clean built files
 clean:
+	echo ">>> Cleaning..."
 	-rm -rf release
 .PHONY: clean
 
 ## Build executable
 build:
 	-mkdir -p release
-	echo "Building: $(ARTEFACT) ..."
+	echo ">>> Building: $(ARTEFACT) ..."
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(LDFLAGS) -o $(ARTEFACT)
 .PHONY: build
 
@@ -44,18 +45,19 @@ $(ARTEFACT): build
 
 ## Run tests
 test:
+	echo ">>> Running tests..."
 	go test ./...
 .PHONY: test
 
 ## Install executable
 install: $(ARTEFACT)
-	echo "Installing $(ARTEFACT) to ${HOME}/.local/bin/$(APPNAME) ..."
+	echo ">>> Installing $(ARTEFACT) to ${HOME}/.local/bin/$(APPNAME) ..."
 	cp $(ARTEFACT) ${HOME}/.local/bin/$(APPNAME)
 .PHONY: install
 
 ## Create Docker image
 image:
-	echo "Building Docker inage ..."
+	echo ">>> Building Docker image..."
 	docker build --rm -t ncarlier/$(APPNAME) .
 .PHONY: image
 
