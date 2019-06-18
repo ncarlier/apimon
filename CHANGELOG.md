@@ -1,5 +1,15 @@
 <a name=""></a>
-# [](https://github.com/ncarlier/apimon/compare/v1.0.0...v) (2019-01-04)
+# [](https://github.com/ncarlier/apimon/compare/v1.1.0...v) (2019-06-18)
+
+
+
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/ncarlier/apimon/compare/v1.0.0...v1.1.0) (2019-06-18)
+
+
+### Features
+
+* service registry with dynamic configuration ([1c9162c](https://github.com/ncarlier/apimon/commit/1c9162c))
 
 
 
