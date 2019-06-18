@@ -31,7 +31,7 @@ $ docker run -d --name=apimon \
   ncarlier/apimon apimon -c /etc/apimon.yml
 ```
 
-Ther is a [Docker Compose example](./docker-compose.yml)
+Here a [Docker Compose example](./docker-compose.yml).
 
 ## Configuration
 
