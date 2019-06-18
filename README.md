@@ -31,6 +31,8 @@ $ docker run -d --name=apimon \
   ncarlier/apimon apimon -c /etc/apimon.yml
 ```
 
+Ther is a [Docker Compose example](./docker-compose.yml)
+
 ## Configuration
 
 The configuration is a YAML file structured like this:
@@ -40,6 +42,7 @@ output:            # Output configuration
   traget: stdout   # By default "stdout"
   format: influxdb # By default "influxdb"
 proxy: http://proxy-internet.localnet:3128 # Global HTTP proxy to use. By default none
+user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0" # UserAgent used
 healthcheck:            # Global healthcheck configuration
   interval: 5s          # By default 30s
   timeout: 2s           # By default 5s
@@ -48,6 +51,7 @@ healthcheck:            # Global healthcheck configuration
       spec: 200-299
 monitors: # List of monitors configuration
   - alias: nunux-keeper-api # The name used within the produced metrics. By default the URL
+    disable: false # Disable the monitor. By default false
     url: https://api.nunux.org/keeper/ # The URL to monitor
     unsafe: true # Don't check SSL certificate. By default false
     proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use (overide global). By default none
@@ -123,6 +127,32 @@ Name   | Spec
 `regexp` | Validates body response with a [regular expression][regexp-syntax] (ex: `^ok$`)
 `cert` | Validates certificate expiration date is before N days (ex: `30`)
 
+### Service Discovery and dynamic configuration
+
+APImon can work alongside [Consul](https://www.consul.io/).
+To do so you must configure the [Consul environment variables](https://www.consul.io/docs/commands/index.html#environment-variables).
+
+Ex:
+
+```bash
+$ # Configure Consul access
+$ export CONSUL_HTTP_ADDR=127.0.0.1:8500
+$ # Start APImon
+$ apimon
+```
+APImon will then register as a service and you can use the K/V store for monitors configuration.
+
+The configuration is stored in the `apimon/monitors' key in YAML:
+
+```yaml
+- alias: google
+  url: www.google.com
+```
+
+This is the equivalent of the `monitors' section of the configuration file.
+
+Updating this key will reload APImon monitors.
+
 ## Usage
 
 Type `apimon -help` to get the usage.
@@ -145,6 +175,11 @@ $ ...
 Here an example of a Grafana dashboard displaying metrics form APImon:
 
 ![screenshot](screenshot.png)
+
+You can find dashboard examples into the `dashboard` folder:
+
+- [Grafana dashboard using InfluxDB](./dashboard/influxdb_sample.json)
+- [Grafana dashboard using Prometheus](./dashboard/prometheus_sample.json)
 
 ## FAQ
 

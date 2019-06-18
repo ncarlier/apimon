@@ -14,10 +14,17 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var healthCheckStatusGauge = prometheus.NewGaugeVec(
-	prometheus.GaugeOpts{
-		Name: "http_health_check_status",
-		Help: "HTTP health check status.",
+var healthCheckOKCounter = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "http_health_check_ok",
+		Help: "HTTP health check OK.",
+	},
+	[]string{"name"},
+)
+var healthCheckKOCounter = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "http_health_check_ko",
+		Help: "HTTP health check kO.",
 	},
 	[]string{"name", "reason"},
 )
@@ -39,7 +46,8 @@ func newPrometheusWriter(uri string) (*PrometheusWriter, error) {
 	if err != nil || u.Scheme != "http" {
 		return nil, fmt.Errorf("invalid listen URL: %s", uri)
 	}
-	prometheus.MustRegister(healthCheckStatusGauge)
+	prometheus.MustRegister(healthCheckOKCounter)
+	prometheus.MustRegister(healthCheckKOCounter)
 	prometheus.MustRegister(healthCheckResponseTimeGauge)
 	srv := &http.Server{Addr: u.Hostname() + ":" + u.Port()}
 	http.Handle(u.Path, promhttp.Handler())
@@ -56,23 +64,24 @@ func newPrometheusWriter(uri string) (*PrometheusWriter, error) {
 
 // Write writes metric to Prometheus
 func (w *PrometheusWriter) Write(metric model.Metric) error {
-	status := 0.0
-	if metric.Status == "UP" {
-		status = 1.0
-	}
 	duration := float64(metric.Duration / time.Millisecond)
 	reason := ""
 	if metric.Error != "" {
 		reason = strings.SplitN(metric.Error, ":", 2)[0]
 		reason = strings.ToLower(reason)
+		healthCheckKOCounter.With(prometheus.Labels{
+			"name":   metric.Name,
+			"reason": reason,
+		}).Inc()
+	} else {
+		healthCheckOKCounter.With(prometheus.Labels{
+			"name": metric.Name,
+		}).Inc()
 	}
 	healthCheckResponseTimeGauge.With(prometheus.Labels{
 		"name": metric.Name,
 	}).Set(duration)
-	healthCheckStatusGauge.With(prometheus.Labels{
-		"name":   metric.Name,
-		"reason": reason,
-	}).Set(status)
+
 	return nil
 }
 

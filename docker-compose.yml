@@ -2,15 +2,33 @@ version: "3"
 
 services:
   #######################################
-  # Prometheus
+  # TSDB: Prometheus
   #######################################
   prom:
     image: "prom/prometheus"
     restart: always
     ports:
-      - "${PORT:-9090}:9090"
+      - "${PROM_PORT:-9090}:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  #######################################
+  # Dashboarding: Grafana
+  #######################################
+  grafana:
+    image: "grafana/grafana:latest"
+    restart: always
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+
+  #######################################
+  # Service discovery: Consul
+  #######################################
+  consul:
+    image: "consul:latest"
+    restart: always
+    ports:
+      - "${CONSUL_PORT:-8500}:8500"
 
   #######################################
   # APImon
@@ -18,5 +36,7 @@ services:
   apimon:
     image: "ncarlier/apimon"
     restart: always
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
     volumes:
       - ./configuration.yml:/configuration.yml
