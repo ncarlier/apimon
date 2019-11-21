@@ -2,7 +2,6 @@ package monitoring
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -72,8 +71,10 @@ func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 		}
 		transport.Proxy = http.ProxyURL(proxyURL)
 	}
-	if conf.Unsafe {
-		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	transport.TLSClientConfig, err = NewTLSConfig(conf)
+	if err != nil {
+		logger.Error.Println("unable to setup TLS client configuration", err)
+		return nil, err
 	}
 	client.Transport = transport
 
@@ -168,7 +169,7 @@ func (m *Monitor) Validate() (time.Duration, error) {
 	}
 
 	if req.Header.Get("User-Agent") == "" {
-		req.Header.Set("User-Agent", "APImonPinger/1.0")
+		req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; APImon/1.0; +https://github.com/ncarlier/apimon)")
 	}
 
 	resp, err := m.Client.Do(req)

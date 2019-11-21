@@ -62,3 +62,22 @@ func TestMonitorWithAdjustedConfiguration(t *testing.T) {
 	assert.Equal(t, expectedTimeout, monitor.Timeout, "Unexpected monitor timeout")
 	assert.Equal(t, expectedInterval, monitor.Interval, "Unexpected monitor timeout")
 }
+
+func TestSimpleMonitor(t *testing.T) {
+	conf := &config.Monitor{
+		URL: "https://www.google.com",
+		Healthcheck: config.Healthcheck{
+			Interval: "5s",
+			Timeout:  "2s",
+			Rules: []config.Rule{
+				config.Rule{Name: "code", Spec: "200"},
+			},
+		},
+	}
+
+	monitor, err := monitoring.NewMonitor(0, *conf)
+	assert.Nil(t, err, "Monitor creation should not fail")
+	assert.NotNil(t, monitor, "Monitor should be created")
+	_, err = monitor.Validate()
+	assert.Nil(t, err, "Monitor should pass")
+}

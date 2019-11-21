@@ -27,6 +27,14 @@ type Healthcheck struct {
 	Rules    []Rule `yaml:"rules"`
 }
 
+// TLS configuration
+type TLS struct {
+	Unsafe         bool   `yaml:"unsafe"`
+	ClientCertFile string `yaml:"client_cert_file"`
+	ClientKeyFile  string `yaml:"client_key_file"`
+	CACertFile     string `yaml:"ca_cert_file"`
+}
+
 // Monitor configuration
 type Monitor struct {
 	Alias       string      `yaml:"alias"`
@@ -35,7 +43,7 @@ type Monitor struct {
 	Headers     []string    `yaml:"headers"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
 	Proxy       string      `yaml:"proxy"`
-	Unsafe      bool        `yaml:"unsafe"`
+	TLS         TLS         `yaml:"tls"`
 }
 
 // Config is the base configuration structure
@@ -47,6 +55,7 @@ type Config struct {
 }
 
 func newConfig(data []byte) (*Config, error) {
+	data = []byte(os.ExpandEnv(string(data)))
 	config := Config{}
 	err := yaml.Unmarshal(data, &config)
 	if err != nil {

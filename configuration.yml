@@ -1,7 +1,7 @@
 output:
   target: http://0.0.0.0:9090/metrics
   format: prometheus
-proxy: http://proxy-internet.localnet:3128/
+proxy: ${HTTP_PROXY}
 healthcheck:
   interval: 10s
   timeout: 2s

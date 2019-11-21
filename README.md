@@ -38,32 +38,38 @@ Here a [Docker Compose example](./docker-compose.yml).
 The configuration is a YAML file structured like this:
 
 ```yaml
-output:            # Output configuration
-  traget: stdout   # By default "stdout"
-  format: influxdb # By default "influxdb"
-proxy: http://proxy-internet.localnet:3128 # Global HTTP proxy to use. By default none
-user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0" # UserAgent used
-healthcheck:            # Global healthcheck configuration
-  interval: 5s          # By default 30s
-  timeout: 2s           # By default 5s
-  rules:                # By default "code: 200"
+output:              # Output configuration
+  traget: stdout     # Output target (default: stdout)
+  format: influxdb   # Output format (default: influxdb)
+proxy: ${HTTP_PROXY} # Global HTTP proxy to use (default: none)
+user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0" # UserAgent used (default: Mozilla/5.0 (compatible; APImon/1.0; +https://github.com/ncarlier/apimon))
+healthcheck:         # Global healthcheck configuration
+  interval: 5s       # Check interval (default: 30s)
+  timeout: 2s        # Request timeout (default: 5s)
+  rules:             # List of rules (default: "code = 200")
     - name: code
       spec: 200-299
 monitors: # List of monitors configuration
-  - alias: nunux-keeper-api # The name used within the produced metrics. By default the URL
-    disable: false # Disable the monitor. By default false
+  - alias: nunux-keeper-api # The name used within the produced metrics (default: the URL)
+    disable: false # Disable the monitor (default: false)
     url: https://api.nunux.org/keeper/ # The URL to monitor
-    unsafe: true # Don't check SSL certificate. By default false
-    proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use (overide global). By default none
-    headers: # HTTP headers to add to the request
+    proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use. Replaces the global configuration (default: none)
+    headers: # HTTP headers to add to the request (default: none)
       - "X-API-Key: xxx-xxx-xxx"
-    healthcheck: # Monitor specific configuration (overide global)
+    tls:
+      unsafe: true # Don't verifies the server's certificate chain and host name (default: false)
+      client_cert_file: ./cert.pem # PEM encoded client certificate file (default: none)
+      client_key_file: ./key.pem   # PEM encoded client key file (default: none
+      ca_cert_file: ./key.pem      # PEM encoded CA's certificate file (default: none)
+    healthcheck: # Monitor specific configuration. Replaces the global configuration.
       timeout: 100ms
       rules:
         - name: code
           spec: 200
   - url: https://reader.nunux.org
 ```
+
+Note: As the proxy example shows, you can use environment variables in your configuration file.
 
 ### Output configuration
 
@@ -163,7 +169,7 @@ the `-c` parameter or the standard input of the command.
 Here come examples of possible usages:
 
 ```bash
-$ # Using the defaul configuration file: `./configuration.yml`
+$ # Using the default configuration file: `./configuration.yml`
 $ apimon
 $ # Using a specific configuration file
 $ apimon -c /etc/apimon.yml
