@@ -152,7 +152,7 @@ The configuration is stored in the `apimon/monitors' key in YAML:
 
 ```yaml
 - alias: google
-  url: www.google.com
+  url: https://www.google.com
 ```
 
 This is the equivalent of the `monitors' section of the configuration file.

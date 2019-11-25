@@ -14,17 +14,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var healthCheckOKCounter = prometheus.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "http_health_check_ok",
-		Help: "HTTP health check OK.",
-	},
-	[]string{"name"},
-)
-var healthCheckKOCounter = prometheus.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "http_health_check_ko",
-		Help: "HTTP health check kO.",
+var healthCheckStatusGauge = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "http_health_check_status",
+		Help: "HTTP health check status.",
 	},
 	[]string{"name", "reason"},
 )
@@ -46,8 +39,7 @@ func newPrometheusWriter(uri string) (*PrometheusWriter, error) {
 	if err != nil || u.Scheme != "http" {
 		return nil, fmt.Errorf("invalid listen URL: %s", uri)
 	}
-	prometheus.MustRegister(healthCheckOKCounter)
-	prometheus.MustRegister(healthCheckKOCounter)
+	prometheus.MustRegister(healthCheckStatusGauge)
 	prometheus.MustRegister(healthCheckResponseTimeGauge)
 	srv := &http.Server{Addr: u.Hostname() + ":" + u.Port()}
 	http.Handle(u.Path, promhttp.Handler())
@@ -69,14 +61,15 @@ func (w *PrometheusWriter) Write(metric model.Metric) error {
 	if metric.Error != "" {
 		reason = strings.SplitN(metric.Error, ":", 2)[0]
 		reason = strings.ToLower(reason)
-		healthCheckKOCounter.With(prometheus.Labels{
+		healthCheckStatusGauge.With(prometheus.Labels{
 			"name":   metric.Name,
 			"reason": reason,
-		}).Inc()
+		}).Set(0)
 	} else {
-		healthCheckOKCounter.With(prometheus.Labels{
-			"name": metric.Name,
-		}).Inc()
+		healthCheckStatusGauge.With(prometheus.Labels{
+			"name":   metric.Name,
+			"reason": "",
+		}).Set(1)
 	}
 	healthCheckResponseTimeGauge.With(prometheus.Labels{
 		"name": metric.Name,
