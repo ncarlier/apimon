@@ -54,7 +54,7 @@ func (m *Monitoring) register() error {
 	if err := agent.ServiceRegister(serviceDef); err != nil {
 		return err
 	}
-	logger.Debug.Println("service registered into the Service Registry:", m.name)
+	logger.Info.Println("service registered into the Service Registry:", m.name)
 
 	go func() {
 		m.ping()
@@ -70,9 +70,10 @@ func (m *Monitoring) register() error {
 	return nil
 }
 
-func (m *Monitoring) unregister() {
+func (m *Monitoring) deregister() {
 	if m.agent != nil {
 		m.agent.ServiceDeregister(m.name)
+		m.kv = nil
 	}
 }
 
@@ -112,10 +113,13 @@ func (m *Monitoring) getSDConfig() ([]config.Monitor, error) {
 
 // RestartOnSDConfigChange restart monitoring when Service Discover configuration change
 func (m *Monitoring) RestartOnSDConfigChange() {
-	if m.kv == nil {
-		return
-	}
 	for {
+		if m.kv == nil {
+			// SD provider not register. Try again...
+			time.Sleep(5 * time.Second)
+			m.register()
+			return
+		}
 		pair, meta, err := m.kv.Get(m.getSDConfigKey(), &consul.QueryOptions{
 			WaitIndex: m.idx,
 		})
@@ -174,7 +178,7 @@ func (m *Monitoring) Start() error {
 // Stop is charged to stop all monitors
 func (m *Monitoring) Stop(ctx context.Context) error {
 	logger.Debug.Println("stopping monitoring...")
-	defer m.unregister()
+	defer m.deregister()
 	c := make(chan struct{})
 	go func() {
 		defer close(c)
