@@ -143,7 +143,7 @@ func (m *Monitoring) Start() error {
 		m.err = err
 		return err
 	}
-	monitors = append(m.conf.Monitors, monitors...)
+	monitors = append(monitors, m.conf.Monitors...)
 	// Now, create all of our monitors.
 	for i := 0; i < len(monitors); i++ {
 		// Get monitor configuration
