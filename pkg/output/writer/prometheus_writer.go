@@ -19,6 +19,13 @@ var healthCheckStatusGauge = prometheus.NewGaugeVec(
 		Name: "http_health_check_status",
 		Help: "HTTP health check status.",
 	},
+	[]string{"name"},
+)
+var healthCheckErrorCounter = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "http_health_check_errors",
+		Help: "HTTP health check errors.",
+	},
 	[]string{"name", "reason"},
 )
 var healthCheckResponseTimeGauge = prometheus.NewGaugeVec(
@@ -41,6 +48,7 @@ func newPrometheusWriter(uri string) (*PrometheusWriter, error) {
 	}
 	prometheus.MustRegister(healthCheckStatusGauge)
 	prometheus.MustRegister(healthCheckResponseTimeGauge)
+	prometheus.MustRegister(healthCheckErrorCounter)
 	srv := &http.Server{Addr: u.Hostname() + ":" + u.Port()}
 	http.Handle(u.Path, promhttp.Handler())
 	go func() {
@@ -62,13 +70,15 @@ func (w *PrometheusWriter) Write(metric model.Metric) error {
 		reason = strings.SplitN(metric.Error, ":", 2)[0]
 		reason = strings.ToLower(reason)
 		healthCheckStatusGauge.With(prometheus.Labels{
+			"name": metric.Name,
+		}).Set(0)
+		healthCheckErrorCounter.With(prometheus.Labels{
 			"name":   metric.Name,
 			"reason": reason,
-		}).Set(0)
+		}).Inc()
 	} else {
 		healthCheckStatusGauge.With(prometheus.Labels{
-			"name":   metric.Name,
-			"reason": "",
+			"name": metric.Name,
 		}).Set(1)
 	}
 	healthCheckResponseTimeGauge.With(prometheus.Labels{
