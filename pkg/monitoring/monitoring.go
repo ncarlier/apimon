@@ -2,6 +2,9 @@ package monitoring
 
 import (
 	"context"
+	"net/url"
+	"os"
+	"strconv"
 	"time"
 
 	consul "github.com/hashicorp/consul/api"
@@ -43,18 +46,34 @@ func (m *Monitoring) register() error {
 	if err != nil {
 		return err
 	}
+
+	port := 0
+	address, err := os.Hostname()
+	if err != nil {
+		address = "127.0.0.1"
+	}
+	if m.conf.Output.Format == "prometheus" {
+		u, err := url.ParseRequestURI(m.conf.Output.Target)
+		if err == nil {
+			port, _ = strconv.Atoi(u.Port())
+		}
+	}
+
 	agent := c.Agent()
 	serviceDef := &consul.AgentServiceRegistration{
-		Name: m.name,
+		Name:    m.name,
+		Port:    port,
+		Address: address,
 		Check: &consul.AgentServiceCheck{
 			TTL: m.ttl.String(),
 		},
 	}
 
+	logger.Debug.Println("registering service Service Registry:", serviceDef.Name, serviceDef.Address, serviceDef.Port)
 	if err := agent.ServiceRegister(serviceDef); err != nil {
 		return err
 	}
-	logger.Info.Println("service registered into the Service Registry:", m.name)
+	logger.Info.Println("service registered into the Service Registry:", serviceDef.Name)
 
 	go func() {
 		m.ping()
