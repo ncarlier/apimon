@@ -27,7 +27,7 @@ var (
 	out        = flag.String("o", "", "Logging output file (default STDOUT)")
 	debug      = flag.Bool("vv", false, "Activate debug logging level")
 	verbose    = flag.Bool("v", false, "Activate verbose logging level")
-	configFile = flag.String("c", "./configuration.yml", "Configuration file (can also be provided with STDIN)")
+	configFile = flag.String("c", "./apimon.yml", "Configuration file (can also be provided with STDIN)")
 )
 
 func main() {

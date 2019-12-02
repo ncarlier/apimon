@@ -27,7 +27,7 @@ $ sudo curl -s https://raw.githubusercontent.com/ncarlier/apimon/master/install.
 
 ```bash
 $ docker run -d --name=apimon \
-  -v ${PWD}/configuration.yml:/etc/apimon.yml \
+  -v ${PWD}/apimon.yml:/etc/apimon.yml \
   ncarlier/apimon apimon -c /etc/apimon.yml
 ```
 
@@ -169,7 +169,7 @@ the `-c` parameter or the standard input of the command.
 Here come examples of possible usages:
 
 ```bash
-$ # Using the default configuration file: `./configuration.yml`
+$ # Using the default configuration file: `./apimon.yml`
 $ apimon
 $ # Using a specific configuration file
 $ apimon -c /etc/apimon.yml
