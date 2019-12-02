@@ -1,5 +1,21 @@
 <a name=""></a>
-# [](https://github.com/ncarlier/apimon/compare/v1.1.0...v) (2019-06-18)
+# [](https://github.com/ncarlier/apimon/compare/v1.1.0...v) (2019-12-02)
+
+
+### Bug Fixes
+
+* **docker:** fix image build ([18c9b23](https://github.com/ncarlier/apimon/commit/18c9b23))
+* **monitoring:** fix monitors concatenation ([41a5c09](https://github.com/ncarlier/apimon/commit/41a5c09))
+* **monitoring:** improve SD resilience ([5337b9b](https://github.com/ncarlier/apimon/commit/5337b9b))
+* **monitoring:** use proper hostname and IP for SD registration ([c752c9c](https://github.com/ncarlier/apimon/commit/c752c9c))
+
+
+### Features
+
+* add client TLS support ([5e9f76d](https://github.com/ncarlier/apimon/commit/5e9f76d))
+* **writer:** improve Prometheus metrics ([b3c057b](https://github.com/ncarlier/apimon/commit/b3c057b))
+* **writer:** use dedicated Prometheus metric for errors ([ca47113](https://github.com/ncarlier/apimon/commit/ca47113))
+* review distribution packaging ([4b4d4b8](https://github.com/ncarlier/apimon/commit/4b4d4b8))
 
 
 
