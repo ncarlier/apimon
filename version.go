@@ -5,9 +5,16 @@ import (
 )
 
 // Version of the app
-var Version = "snapshot"
+var Version = ""
+
+// GitCommit hash
+var GitCommit = "HEAD"
 
 func printVersion() {
+	version := Version
+	if version == "" {
+		version = GitCommit
+	}
 	fmt.Printf(`apimon (%s)
 Copyright (C) 2018 Nicolas Carlier. All rights reserved.
 

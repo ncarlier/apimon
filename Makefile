@@ -1,5 +1,7 @@
 .SILENT :
 
+export GO111MODULE=on
+
 # App name
 APPNAME=apimon
 
@@ -7,18 +9,21 @@ APPNAME=apimon
 GOOS?=linux
 GOARCH?=amd64
 
-export GO111MODULE=on
-
 # Add exe extension if windows target
 is_windows:=$(filter windows,$(GOOS))
 EXT:=$(if $(is_windows),".exe","")
 
-# Artefact name
-ARTEFACT=release/$(APPNAME)-$(GOOS)-$(GOARCH)$(EXT)
+# Archive name
+ARCHIVE=$(APPNAME)-$(GOOS)-$(GOARCH).tgz
+
+# Executable name
+EXECUTABLE=$(APPNAME)$(EXT)
 
 # Extract version infos
+# Extract version infos
 VERSION:=`git describe --tags`
-LDFLAGS=-ldflags "-X main.Version=${VERSION}"
+GIT_COMMIT:=`git rev-list -1 HEAD`
+LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.GitCommit=${GIT_COMMIT}"
 
 all: build
 
@@ -37,11 +42,11 @@ clean:
 ## Build executable
 build:
 	-mkdir -p release
-	echo ">>> Building: $(ARTEFACT) ..."
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(LDFLAGS) -o $(ARTEFACT)
+	echo ">>> Building: $(EXECUTABLE) ..."
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(LDFLAGS) -o release/$(EXECUTABLE)
 .PHONY: build
 
-$(ARTEFACT): build
+release/$(EXECUTABLE): build
 
 ## Run tests
 test:
@@ -50,9 +55,9 @@ test:
 .PHONY: test
 
 ## Install executable
-install: $(ARTEFACT)
-	echo ">>> Installing $(ARTEFACT) to ${HOME}/.local/bin/$(APPNAME) ..."
-	cp $(ARTEFACT) ${HOME}/.local/bin/$(APPNAME)
+install: release/$(EXECUTABLE)
+	echo ">>> Installing $(EXECUTABLE) to ${HOME}/.local/bin/$(EXECUTABLE) ..."
+	install release/$(EXECUTABLE) ~/.local/bin/
 .PHONY: install
 
 ## Create Docker image
@@ -66,18 +71,25 @@ changelog:
 	standard-changelog --first-release
 .PHONY: changelog
 
-## GZIP executable
-gzip:
-	gzip $(ARTEFACT)
-.PHONY: gzip
+## Create archive
+archive:
+	echo ">>> Creating release/$(ARCHIVE) archive..."
+	tar czf release/$(ARCHIVE) \
+		--exclude=*.tgz \
+	 	README.md \
+		LICENSE \
+		CHANGELOG.md \
+		-C release/ $(subst release/,,$(wildcard release/*))
+	find release/ -type f -not -name '*.tgz' -delete
+.PHONY: archive
 
 ## Create distribution binaries
 distribution:
-	GOARCH=amd64 make build gzip
-	GOARCH=arm64 make build gzip
-	GOARCH=arm make build gzip
-	GOOS=darwin make build gzip
-	GOOS=windows make build gzip
+	GOARCH=amd64 make build archive
+	GOARCH=arm64 make build archive
+	GOARCH=arm   make build archive
+	GOOS=windows make build archive
+	GOOS=darwin  make build archive
 .PHONY: distribution
 
 ## Deploy Docker stack

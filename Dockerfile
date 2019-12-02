@@ -1,7 +1,7 @@
 #########################################
 # Build stage
 #########################################
-FROM golang:1.12 AS builder
+FROM golang:1.13 AS builder
 
 # Repository location
 ARG REPOSITORY=github.com/ncarlier
@@ -40,4 +40,3 @@ COPY --from=builder /go/src/$REPOSITORY/$ARTIFACT/release/$ARTIFACT-linux-amd64 
 
 # Define command
 CMD apimon
-
