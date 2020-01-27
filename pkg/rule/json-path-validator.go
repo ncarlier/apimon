@@ -39,8 +39,8 @@ func (v *jsonPathValidator) Validate(body string, resp *http.Response) error {
 	if err != nil {
 		return err
 	}
-	if v, ok := res.([]interface{}); ok == true {
-		if len(v) == 0 {
+	if val, ok := res.([]interface{}); ok == true {
+		if len(val) == 0 {
 			return fmt.Errorf("body does not match JSON path")
 		}
 	}
