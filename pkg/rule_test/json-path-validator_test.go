@@ -14,7 +14,7 @@ var json = `
 	"services": [
 		{"name": "foo", "status": "UP"},
 		{"name": "bar", "status": "DOWN"},
-		{"name": "cnt", "status": "DOWN", "messageCount": 100}
+		{"name": "cnt", "status": "DOWN", "messageCount": 101}
 	]
 }
 `
@@ -28,7 +28,7 @@ var jsonPathValidationTests = []struct {
 	{"$.services[0].missing", json, fmt.Errorf("unknown key missing")},
 	{"$.services[?(@.status == \"UP\")]", json, nil},
 	{"$.services[?(@.status == \"UP\")].name", json, nil},
-	{"$.services[?(@.messageCount > 1000)]", json, nil},
+	{"$.services[?(@.messageCount > 100)]", json, nil},
 	{"$.services[?(@.status == \"ERROR\")].name", json, fmt.Errorf("body does not match JSON path")},
 }
 
