@@ -1,24 +1,33 @@
 package rule
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/oliveagle/jsonpath"
+	"github.com/PaesslerAG/gval"
+	"github.com/PaesslerAG/jsonpath"
 )
 
 type jsonPathValidator struct {
 	name string
 	spec string
+	eval gval.Evaluable
 }
 
-func newJSONPathValidator(spec string) Validator {
+func newJSONPathValidator(spec string) (Validator, error) {
+	builder := gval.Full(jsonpath.PlaceholderExtension())
+	eval, err := builder.NewEvaluable(spec)
+	if err != nil {
+		return nil, err
+	}
 	validator := &jsonPathValidator{
 		name: "json-path",
 		spec: spec,
+		eval: eval,
 	}
-	return validator
+	return validator, nil
 }
 
 func (v *jsonPathValidator) Name() string {
@@ -35,15 +44,14 @@ func (v *jsonPathValidator) Validate(body string, resp *http.Response) error {
 	if err != nil {
 		return fmt.Errorf("body is not valid JSON")
 	}
-	res, err := jsonpath.JsonPathLookup(jsonData, v.spec)
+
+	res, err := v.eval(context.Background(), jsonData)
 	if err != nil {
 		return err
 	}
-	if val, ok := res.([]interface{}); ok == true {
-		if len(val) == 0 {
-			return fmt.Errorf("body does not match JSON path")
-		}
-	}
 	// fmt.Println("RES=", res)
+	if val, ok := res.([]interface{}); ok && len(val) == 0 {
+		return fmt.Errorf("body does not match JSON path")
+	}
 	return nil
 }

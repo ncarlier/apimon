@@ -31,7 +31,7 @@ func createValidator(rule config.Rule) (Validator, error) {
 	case "regexp":
 		result, err = newRegexpValidator(rule.Spec)
 	case "json-path":
-		result = newJSONPathValidator(rule.Spec)
+		result, err = newJSONPathValidator(rule.Spec)
 	case "json-expr":
 		result = newJSONExprValidator(rule.Spec)
 	case "cert":
