@@ -1,5 +1,16 @@
 <a name=""></a>
-# [](https://github.com/ncarlier/apimon/compare/v1.2.0...v) (2019-12-02)
+# [](https://github.com/ncarlier/apimon/compare/v1.2.0...v) (2020-02-07)
+
+
+### Bug Fixes
+
+* **rule:** fix JSON path validator ([49c47d7](https://github.com/ncarlier/apimon/commit/49c47d7))
+* fix JSON path test case ([71ef7eb](https://github.com/ncarlier/apimon/commit/71ef7eb))
+
+
+### Features
+
+* **validator:** switch JSON path library ([b4139bc](https://github.com/ncarlier/apimon/commit/b4139bc))
 
 
 
