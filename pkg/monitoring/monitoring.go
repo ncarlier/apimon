@@ -35,7 +35,7 @@ func NewMonitoring(conf config.Config) *Monitoring {
 	}
 	// Register service into SD registry
 	if err := mon.register(); err != nil {
-		logger.Error.Println("unable to register monitoring service", err)
+		logger.Warning.Println("unable to register service to SD registry", err)
 	}
 
 	return mon

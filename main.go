@@ -48,11 +48,11 @@ func main() {
 	}
 
 	// Get logging level
-	level := "info"
+	level := "warn"
 	if *debug {
 		level = "debug"
 	} else if *verbose {
-		level = "verbose"
+		level = "info"
 	}
 
 	// Setup logger

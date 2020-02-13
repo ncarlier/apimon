@@ -96,7 +96,7 @@ func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 		Validators: validators,
 		Headers:    conf.Headers,
 	}
-	logger.Debug.Printf("monitor created: %s\n", monitor)
+	logger.Info.Printf("monitor created: %s\n", monitor)
 
 	return &monitor, nil
 }
