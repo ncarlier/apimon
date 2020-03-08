@@ -53,6 +53,7 @@ monitors: # List of monitors configuration
   - alias: nunux-keeper-api # The name used within the produced metrics (default: the URL)
     disable: false # Disable the monitor (default: false)
     url: https://api.nunux.org/keeper/ # The URL to monitor
+    method: GET # HTTP method used (default: GET)
     proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use. Replaces the global configuration (default: none)
     headers: # HTTP headers to add to the request (default: none)
       - "X-API-Key: xxx-xxx-xxx"

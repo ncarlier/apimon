@@ -20,11 +20,20 @@ import (
 var defaultDuration = time.Duration(30) * time.Second
 var defaultTimeout = time.Duration(5) * time.Second
 
+func getValidHTTPMethod(method string) string {
+	method = strings.ToUpper(method)
+	if method == http.MethodHead || method == http.MethodGet || method == http.MethodPost {
+		return method
+	}
+	return http.MethodGet
+}
+
 // Monitor is a go routine in charge of the monitoring work.
 type Monitor struct {
 	ID         int
 	Alias      string
 	URL        url.URL
+	Method     string
 	Headers    []string
 	Client     *http.Client
 	Interval   time.Duration
@@ -90,6 +99,7 @@ func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 		ID:         id,
 		Alias:      conf.Alias,
 		URL:        *u,
+		Method:     getValidHTTPMethod(conf.Method),
 		Client:     client,
 		Interval:   interval,
 		Timeout:    timeout,
@@ -104,9 +114,10 @@ func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 // String to string convertion
 func (m Monitor) String() string {
 	return fmt.Sprintf(
-		"{id: %d, alias: \"%s\", url: \"%s\", interval: \"%s\", timeout: \"%s\"}",
+		"{id: %d, alias: \"%s\", method: \"%s\", url: \"%s\", interval: \"%s\", timeout: \"%s\"}",
 		m.ID,
 		m.Alias,
+		m.Method,
 		m.URL.String(),
 		m.Interval,
 		m.Timeout)
@@ -155,7 +166,7 @@ func (m *Monitor) Validate() (time.Duration, error) {
 		cancel()
 	})
 
-	req, err := http.NewRequest("GET", m.URL.String(), nil)
+	req, err := http.NewRequest(m.Method, m.URL.String(), nil)
 	if err != nil {
 		return time.Since(start), fmt.Errorf("PREPARE_REQUEST: %s", err)
 	}

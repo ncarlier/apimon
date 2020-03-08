@@ -40,6 +40,7 @@ type Monitor struct {
 	Alias       string      `yaml:"alias"`
 	Disable     bool        `yaml:"disable"`
 	URL         string      `yaml:"url"`
+	Method      string      `yaml:"method"`
 	Headers     []string    `yaml:"headers"`
 	Healthcheck Healthcheck `yaml:"healthcheck"`
 	Proxy       string      `yaml:"proxy"`
