@@ -50,14 +50,16 @@ type Monitor struct {
 
 // Config is the base configuration structure
 type Config struct {
-	Output      Output            `yaml:"output"`
-	Healthcheck Healthcheck       `yaml:"healthcheck"`
-	Proxy       string            `yaml:"proxy"`
-	Labels      map[string]string `yaml:"labels"`
-	Monitors    []Monitor         `yaml:"monitors"`
+	Output        Output            `yaml:"output"`
+	Healthcheck   Healthcheck       `yaml:"healthcheck"`
+	Proxy         string            `yaml:"proxy"`
+	Labels        map[string]string `yaml:"labels"`
+	Monitors      []Monitor         `yaml:"monitors"`
+	MonitorsFiles []string          `yaml:"monitors_files"`
 }
 
-func newConfig(data []byte) (*Config, error) {
+// NewConfig create new configuration from bytes
+func NewConfig(data []byte) (*Config, error) {
 	data = []byte(os.ExpandEnv(string(data)))
 	config := Config{}
 	err := yaml.Unmarshal(data, &config)
@@ -83,7 +85,7 @@ func Load(configFilename string) (*Config, error) {
 			err = fmt.Errorf("unable to load configuration from STDIN: %s", err.Error())
 			return nil, err
 		}
-		return newConfig(data)
+		return NewConfig(data)
 	}
 
 	// Try to load configuration from file...
@@ -92,7 +94,7 @@ func Load(configFilename string) (*Config, error) {
 		err = fmt.Errorf("unable to load configuration from file (%s): %s", configFilename, err.Error())
 		return nil, err
 	}
-	return newConfig(data)
+	return NewConfig(data)
 }
 
 // MergeHealthcheckConfig merge a healthcheck configuration with another

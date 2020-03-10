@@ -161,7 +161,7 @@ func (m *Monitor) Stop() {
 	logger.Debug.Printf("monitor %s#%d stopped\n", m.Alias, m.ID)
 }
 
-// Validate the monitor endpoint by aplying all validators
+// Validate the monitor endpoint by applying all validators
 func (m *Monitor) Validate() (time.Duration, error) {
 	start := time.Now()
 	ctx, cancel := context.WithCancel(context.TODO())
