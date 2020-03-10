@@ -37,22 +37,24 @@ type TLS struct {
 
 // Monitor configuration
 type Monitor struct {
-	Alias       string      `yaml:"alias"`
-	Disable     bool        `yaml:"disable"`
-	URL         string      `yaml:"url"`
-	Method      string      `yaml:"method"`
-	Headers     []string    `yaml:"headers"`
-	Healthcheck Healthcheck `yaml:"healthcheck"`
-	Proxy       string      `yaml:"proxy"`
-	TLS         TLS         `yaml:"tls"`
+	Alias       string            `yaml:"alias"`
+	Disable     bool              `yaml:"disable"`
+	URL         string            `yaml:"url"`
+	Method      string            `yaml:"method"`
+	Headers     []string          `yaml:"headers"`
+	Healthcheck Healthcheck       `yaml:"healthcheck"`
+	Proxy       string            `yaml:"proxy"`
+	TLS         TLS               `yaml:"tls"`
+	Labels      map[string]string `yaml:"labels"`
 }
 
 // Config is the base configuration structure
 type Config struct {
-	Output      Output      `yaml:"output"`
-	Healthcheck Healthcheck `yaml:"healthcheck"`
-	Proxy       string      `yaml:"proxy"`
-	Monitors    []Monitor   `yaml:"monitors"`
+	Output      Output            `yaml:"output"`
+	Healthcheck Healthcheck       `yaml:"healthcheck"`
+	Proxy       string            `yaml:"proxy"`
+	Labels      map[string]string `yaml:"labels"`
+	Monitors    []Monitor         `yaml:"monitors"`
 }
 
 func newConfig(data []byte) (*Config, error) {
@@ -104,6 +106,18 @@ func MergeHealthcheckConfig(a, b Healthcheck) Healthcheck {
 	}
 	if len(result.Rules) == 0 {
 		result.Rules = a.Rules
+	}
+	return result
+}
+
+// MergeLabelsConfig merge a label configuration with another
+func MergeLabelsConfig(a, b map[string]string) map[string]string {
+	result := make(map[string]string)
+	for k, v := range a {
+		result[k] = v
+	}
+	for k, v := range b {
+		result[k] = v
 	}
 	return result
 }

@@ -40,6 +40,7 @@ type Monitor struct {
 	Timeout    time.Duration
 	Validators []rule.Validator
 	Ticker     *time.Ticker
+	Labels     map[string]string
 }
 
 // NewMonitor create a new monitor
@@ -105,6 +106,7 @@ func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 		Timeout:    timeout,
 		Validators: validators,
 		Headers:    conf.Headers,
+		Labels:     conf.Labels,
 	}
 	logger.Info.Printf("monitor created: %s\n", monitor)
 
@@ -139,6 +141,7 @@ func (m *Monitor) Start() {
 				Name:      name,
 				Status:    "UP",
 				Timestamp: time.Now(),
+				Labels:    m.Labels,
 			}
 			var err error
 			_metric.Duration, err = m.Validate()

@@ -176,6 +176,7 @@ func (m *Monitoring) Start() error {
 		}
 		// Apply global configuration
 		mConfig.Healthcheck = config.MergeHealthcheckConfig(m.conf.Healthcheck, mConfig.Healthcheck)
+		mConfig.Labels = config.MergeLabelsConfig(m.conf.Labels, mConfig.Labels)
 		// Apply proxy configuration
 		if mConfig.Proxy == "" {
 			mConfig.Proxy = m.conf.Proxy
