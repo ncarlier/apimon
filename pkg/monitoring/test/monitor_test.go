@@ -1,4 +1,4 @@
-package monitoring_test
+package test
 
 import (
 	"testing"
@@ -66,6 +66,7 @@ func TestMonitorWithAdjustedConfiguration(t *testing.T) {
 func TestSimpleMonitor(t *testing.T) {
 	conf := &config.Monitor{
 		URL: "https://www.google.com",
+		// Proxy: "http://proxy-internet.localnet:3128",
 		Healthcheck: config.Healthcheck{
 			Interval: "5s",
 			Timeout:  "2s",

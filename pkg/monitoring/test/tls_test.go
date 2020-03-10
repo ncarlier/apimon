@@ -1,4 +1,4 @@
-package monitoring_test
+package test
 
 import (
 	"crypto/tls"

@@ -1,4 +1,4 @@
-package rule_test
+package test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/ncarlier/apimon/pkg/rule"
 )
 
-var notmatch = fmt.Errorf("body does not match the RegExp")
+var errNotMatch = fmt.Errorf("body does not match the RegExp")
 
 var regExpValidationTests = []struct {
 	spec     string
@@ -18,8 +18,8 @@ var regExpValidationTests = []struct {
 }{
 	{"hello", "hello world", nil},
 	{"(foo){2}", "foofoobar", nil},
-	{"(foo){2}", "foobarbar", notmatch},
-	{"foo", "bar", notmatch},
+	{"(foo){2}", "foobarbar", errNotMatch},
+	{"foo", "bar", errNotMatch},
 }
 
 func TestRegExpValidator(t *testing.T) {

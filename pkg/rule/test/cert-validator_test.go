@@ -1,4 +1,4 @@
-package rule_test
+package test
 
 import (
 	"net/http"
