@@ -49,6 +49,8 @@ healthcheck:         # Global healthcheck configuration
   rules:             # List of rules (default: "code = 200")
     - name: code
       spec: 200-299
+monitors_files: # List of external monitors configuration (default: none)
+  - "monitor_*.yml" # File to load (support wildcard)
 monitors: # List of monitors configuration
   - alias: nunux-keeper-api # The name used within the produced metrics (default: the URL)
     disable: false # Disable the monitor (default: false)
