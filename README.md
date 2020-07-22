@@ -56,9 +56,11 @@ monitors: # List of monitors configuration
     disable: false # Disable the monitor (default: false)
     url: https://api.nunux.org/keeper/ # The URL to monitor
     method: GET # HTTP method used (default: GET)
-    proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use. Replaces the global configuration (default: none)
     headers: # HTTP headers to add to the request (default: none)
       - "X-API-Key: xxx-xxx-xxx"
+    body: > # HTTP request body
+      { "foo": "bar" }
+    proxy: http://proxy-internet.localnet:3128 # Specific HTTP proxy to use. Replaces the global configuration (default: none)
     tls:
       unsafe: true # Don't verifies the server's certificate chain and host name (default: false)
       client_cert_file: ./cert.pem # PEM encoded client certificate file (default: none)

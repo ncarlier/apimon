@@ -42,6 +42,7 @@ type Monitor struct {
 	URL         string            `yaml:"url"`
 	Method      string            `yaml:"method"`
 	Headers     []string          `yaml:"headers"`
+	Body        string            `yaml:"body"`
 	Healthcheck Healthcheck       `yaml:"healthcheck"`
 	Proxy       string            `yaml:"proxy"`
 	TLS         TLS               `yaml:"tls"`

@@ -14,7 +14,7 @@ func TestMonitorWithBadURLConfiguration(t *testing.T) {
 		URL: "foo",
 		Healthcheck: config.Healthcheck{
 			Rules: []config.Rule{
-				config.Rule{Name: "code", Spec: "200"},
+				{Name: "code", Spec: "200"},
 			},
 		},
 	}
@@ -51,7 +51,7 @@ func TestMonitorWithAdjustedConfiguration(t *testing.T) {
 			Interval: "2s",
 			Timeout:  "2s",
 			Rules: []config.Rule{
-				config.Rule{Name: "code", Spec: "200"},
+				{Name: "code", Spec: "200"},
 			},
 		},
 	}
@@ -71,7 +71,7 @@ func TestSimpleMonitor(t *testing.T) {
 			Interval: "5s",
 			Timeout:  "2s",
 			Rules: []config.Rule{
-				config.Rule{Name: "code", Spec: "200"},
+				{Name: "code", Spec: "200"},
 			},
 		},
 	}

@@ -3,6 +3,7 @@ package monitoring
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -35,6 +36,7 @@ type Monitor struct {
 	URL        url.URL
 	Method     string
 	Headers    []string
+	Body       string
 	Client     *http.Client
 	Interval   time.Duration
 	Timeout    time.Duration
@@ -101,11 +103,12 @@ func NewMonitor(id int, conf config.Monitor) (*Monitor, error) {
 		Alias:      conf.Alias,
 		URL:        *u,
 		Method:     getValidHTTPMethod(conf.Method),
+		Headers:    conf.Headers,
+		Body:       conf.Body,
 		Client:     client,
 		Interval:   interval,
 		Timeout:    timeout,
 		Validators: validators,
-		Headers:    conf.Headers,
 		Labels:     conf.Labels,
 	}
 	logger.Info.Printf("monitor created: %s\n", monitor)
@@ -169,7 +172,12 @@ func (m *Monitor) Validate() (time.Duration, error) {
 		cancel()
 	})
 
-	req, err := http.NewRequest(m.Method, m.URL.String(), nil)
+	var b io.Reader
+	if m.Body != "" {
+		b = strings.NewReader(m.Body)
+	}
+
+	req, err := http.NewRequest(m.Method, m.URL.String(), b)
 	if err != nil {
 		return time.Since(start), fmt.Errorf("PREPARE_REQUEST: %s", err)
 	}
