@@ -19,7 +19,7 @@ func TestMonitorWithBadURLConfiguration(t *testing.T) {
 		},
 	}
 
-	expected := "parse foo: invalid URI for request"
+	expected := "parse \"foo\": invalid URI for request"
 	_, err := monitoring.NewMonitor(0, *conf)
 	assert.NotNil(t, err, "Monitor creation should fail")
 	assert.Equal(t, expected, err.Error(), "Unexpected error")
